@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <account name="SVN服务器" url="http://112.74.106.249:8789" username="mcnet" 
+           secretkey="396e2ec2a8dc624b903e56e5a1faf9b1-0ec560e8fe813c4590af9bb29a27f3da-e9b30094c708a843802cb0e32cabe94f" />
+  
+  <account secretkey="c00ae8c71bff594d8bd8b58e5cafdb39-6334452252ef204bb54d4525808c310c-4df286ebeca1464a9e9eb4523073f73a"
+           username="mcnet" url="http://39.108.142.24:8789/" name="TTAQY服务器"/>
+</root>

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <account name="TTAQY服务器" url="http://39.108.142.24:8789/" username="hewf" secretkey="19123a09411d9641b4dfc15e5ebc8573-98c6e4810569e64cb88d5048d095f313-f21420803a94f2459f745507a7d754ac" ip="113.65.128.5" />
+  <account name="TTAQY服务器" url="http://39.108.142.24:8789/" username="mcnet" secretkey="c00ae8c71bff594d8bd8b58e5cafdb39-6334452252ef204bb54d4525808c310c-4df286ebeca1464a9e9eb4523073f73a" ip="113.65.31.49" />
+  <account name="TTAQY服务器" url="http://39.108.142.24:8789/" username="cai" secretkey="dceb58c9f43c9e4187f6ed2689532953-12673badaade0a4088cb10e2e563663b-246d1a73c343624b83d6bad3b0dfd704" ip="119.131.180.144" />
+  <account name="TTAQY服务器" url="http://39.108.142.24:8789/" username="JMhwf" secretkey="894f375792c3864489ec849795217710-9753819cf6f00b40a8f4ddfba06322ae-b923a28c42fbbf4caf0db4ef174ade4f" ip="" />
+  <account name="TTAQY服务器" url="http://39.108.142.24:8789/" username="sunjm" secretkey="9905558172a37941b555989fcfba0517-79dfa0df55dd704599dffa60fdd65005-55956c8678611042be10145caac9e7c6" ip="" />
+</root>

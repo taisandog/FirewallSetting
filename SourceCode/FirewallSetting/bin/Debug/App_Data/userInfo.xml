@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <account name="SVN服务器" url="127.0.0.1" username="hewf" secretkey="f0639a029fd2794f858427d9f30745ba" />
+  <account name="SVN服务器" url="127.0.0.1" username="mcnet" secretkey="959ecae4ebb1164e80e7aaf71373bd10-3a8bf24897d4e940bfc444adf8eae5bd-f5fb26fea1a7204db16d6a0334f98580" />
+</root>
