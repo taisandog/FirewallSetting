@@ -15,10 +15,22 @@ https://github.com/taisandog/FirewallSetting.git/trunk/Release
 
 *绑定规则*
 文件:\Server\App_Data\firewallRule.xml
-打开后
-·<root>
+
+`<root>
 <rule name="远程桌面" ruleName="Open RDP Port 3389" rulePath=""
       remotePorts="" localPorts="3389" direction="IN"/>
-</root>·
+</root>`
 
+name：显示的名字
 
+ruleName：防火墙的规则名
+
+rulePath：如果防火墙是指定程序，这里填写程序路径
+
+remotePorts：远程端口
+
+localPorts：设置的本地端口
+
+direction：出口方向还是入口方向（OUT：出口，IN入方向）
+
+*
