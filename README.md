@@ -27,5 +27,4 @@ direction：出口方向还是入口方向（OUT：出口，IN入方向）
 `<add key="Server.Name" value="测试服务器(前端服务)"/>
 <add key="Server.URL" value="http://127.0.0.1:8789"/>
 <add key="Server.Listen" value="http://+:8789/"/>
-<!--默认添加的白名单IP,用,隔开-->
 <add key="Server.AllowIP" value="192.168.1.1-192.168.1.255"/>`
