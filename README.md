@@ -19,5 +19,14 @@ remotePorts：远程端口
 localPorts：设置的本地端口  
 direction：出口方向还是入口方向（OUT：出口，IN入方向） 
 
+*设置用户*  
+在服务端界面右击信息的用户列表，选择新增用户，输入用户名，已经新增用户了
 
-
+*服务设置*
+文件:\Server\FirewallSetting.exe.config  
+`
+<add key="Server.Name" value="测试服务器(前端服务)"/>
+<add key="Server.URL" value="http://127.0.0.1:8789"/>
+<add key="Server.Listen" value="http://+:8789/"/>
+<!--默认添加的白名单IP,用,隔开-->
+<add key="Server.AllowIP" value="192.168.1.1-192.168.1.255"/>`
