@@ -25,6 +25,13 @@ direction：出口方向还是入口方向（OUT：出口，IN入方向）
 *服务设置*
 文件:\Server\FirewallSetting.exe.config  
 `<add key="Server.Name" value="测试服务器(前端服务)"/>
-<add key="Server.URL" value="http://127.0.0.1:8789"/>
+<add key="Server.URL" value="http://XXX.XXX.XXX.XXX:8789"/>
 <add key="Server.Listen" value="http://+:8789/"/>
 <add key="Server.AllowIP" value="192.168.1.1-192.168.1.255"/>`
+
+Server.Name 服务器名
+Server.URL 当前Web服务器的外网地址
+Server.Listen  监控地址，+表示0.0.0.0
+Server.AllowIP  预设IP，例如本服务器允许几个内网地址
+
+***客户端***
