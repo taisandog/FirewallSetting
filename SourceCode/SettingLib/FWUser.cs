@@ -1,4 +1,5 @@
 ﻿using Buffalo.Kernel;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +15,11 @@ namespace SettingLib
     public class FWUser
     {
         protected SettingInvoke _handle=new SettingInvoke("");
+        public static string XmlPath = null;
         /// <summary>
         /// 网络请求
         /// </summary>
+        [JsonIgnore]
         public SettingInvoke Handle
         {
             get
@@ -166,12 +169,14 @@ namespace SettingLib
             return string.Equals(curSign, sign, StringComparison.CurrentCultureIgnoreCase);
         }
 
+
+
         /// <summary>
         /// 保存配置
         /// </summary>
         /// <param name="path"></param>
         /// <param name="lstUser"></param>
-        public static void SaveConfig(string path, List<FWUser> lstUser)
+        public static void SaveConfig( List<FWUser> lstUser)
         {
             XmlDocument doc = new XmlDocument();
             XmlDeclaration xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
@@ -185,13 +190,30 @@ namespace SettingLib
                 XmlNode item = doc.CreateElement("account");
 
                 XmlAttribute att = doc.CreateAttribute("name");
-                att.InnerText = serverName;
+                if (!string.IsNullOrWhiteSpace(serverName))
+                {
+                    att.InnerText = serverName;
+                }
+                else
+                {
+                    att.InnerText = user.Name;
+                    
+                }
                 item.Attributes.Append(att);
+
 
                 att = doc.CreateAttribute("url");
-                att.InnerText = serverUrl;
-                item.Attributes.Append(att);
+                if (!string.IsNullOrWhiteSpace(serverUrl))
+                {
+                    att.InnerText = serverUrl;
+                }
+                else
+                {
+                    att.InnerText = user.Url;
 
+                }
+                item.Attributes.Append(att);
+                
                 att = doc.CreateAttribute("username");
                 att.InnerText = user.UserName;
                 item.Attributes.Append(att);
@@ -206,19 +228,34 @@ namespace SettingLib
 
                 rootNode.AppendChild(item);
             }
-            doc.Save(path);
+            doc.Save(XmlPath);
         }
-
+        /// <summary>
+        /// 转换成Json
+        /// </summary>
+        /// <returns></returns>
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
+        /// <summary>
+        /// 转换成Json
+        /// </summary>
+        /// <returns></returns>
+        public static FWUser LoadJson(string json)
+        {
+            return JsonConvert.DeserializeObject<FWUser>(json);
+        }
         /// <summary>
         /// 加载配置
         /// </summary>
         /// <param name="xml"></param>
         /// <returns></returns>
-        public static List<FWUser> LoadConfig(string xml)
+        public static List<FWUser> LoadConfig()
         {
             //string xml = UserManager.BasePath + "\\accont.xml";
             XmlDocument doc = new XmlDocument();
-            doc.Load(xml);
+            doc.Load(XmlPath);
             XmlNodeList lstRule = doc.GetElementsByTagName("account");
             List<FWUser> lstRet = new List<FWUser>();
             FWUser user = null;

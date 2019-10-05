@@ -53,14 +53,10 @@ namespace SettingLib
         /// </summary>
         public void LoadUser()
         {
-            string path = BasePath + "userInfo.xml";
-            if (!File.Exists(path))
-            {
-                _lstUser = new List<FWUser>();
-                return;
-            }
 
-            _lstUser = FWUser.LoadConfig(path);
+            
+
+            _lstUser = FWUser.LoadConfig();
         }
         /// <summary>
         /// 根据名字获取用户
@@ -102,7 +98,7 @@ namespace SettingLib
         public void SaveConfig()
         {
             string path = BasePath + "userInfo.xml";
-            FWUser.SaveConfig(path, _lstUser);
+            FWUser.SaveConfig( _lstUser);
         }
         /// <summary>
         /// 刷新到防火墙信息

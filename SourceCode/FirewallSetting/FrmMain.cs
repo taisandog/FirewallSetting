@@ -361,6 +361,20 @@ namespace FirewallSetting
             string path = UserManager.BasePath ;
             Process.Start(path);
         }
+
+        private void TsCopyUser_Click(object sender, EventArgs e)
+        {
+            if (dgMembers.SelectedRows.Count <= 0)
+            {
+                return;
+            }
+            FWUser user = dgMembers.SelectedRows[0].DataBoundItem as FWUser;
+            if (user == null)
+            {
+                return;
+            }
+            FrmText.ShowText("用户:" + user.UserName + "的配置", user.ToJson());
+        }
     }
     
 }

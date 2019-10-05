@@ -34,6 +34,12 @@
             this.dgMembers = new System.Windows.Forms.DataGridView();
             this.ColUserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cmUser = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsNewUser = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRePwd = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.dgRules = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -45,19 +51,14 @@
             this.button1 = new System.Windows.Forms.Button();
             this.mbDisplay = new Library.MessageBox();
             this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
-            this.cmUser = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.tsRePwd = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsDelete = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsNewUser = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsOpen = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsCopyUser = new System.Windows.Forms.ToolStripMenuItem();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgMembers)).BeginInit();
+            this.cmUser.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgRules)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.cmUser.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbMain
@@ -108,6 +109,51 @@
             this.ColIP.HeaderText = "IP";
             this.ColIP.Name = "ColIP";
             this.ColIP.ReadOnly = true;
+            // 
+            // cmUser
+            // 
+            this.cmUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsNewUser,
+            this.tsRePwd,
+            this.tsCopyUser,
+            this.toolStripMenuItem1,
+            this.tsDelete,
+            this.tsOpen});
+            this.cmUser.Name = "cmUser";
+            this.cmUser.Size = new System.Drawing.Size(204, 142);
+            // 
+            // tsNewUser
+            // 
+            this.tsNewUser.Name = "tsNewUser";
+            this.tsNewUser.Size = new System.Drawing.Size(203, 22);
+            this.tsNewUser.Text = "新增用户";
+            this.tsNewUser.Click += new System.EventHandler(this.tsNewUser_Click);
+            // 
+            // tsRePwd
+            // 
+            this.tsRePwd.Name = "tsRePwd";
+            this.tsRePwd.Size = new System.Drawing.Size(203, 22);
+            this.tsRePwd.Text = "重置密码";
+            this.tsRePwd.Click += new System.EventHandler(this.tsRePwd_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(200, 6);
+            // 
+            // tsDelete
+            // 
+            this.tsDelete.Name = "tsDelete";
+            this.tsDelete.Size = new System.Drawing.Size(203, 22);
+            this.tsDelete.Text = "删除";
+            this.tsDelete.Click += new System.EventHandler(this.tsDelete_Click);
+            // 
+            // tsOpen
+            // 
+            this.tsOpen.Name = "tsOpen";
+            this.tsOpen.Size = new System.Drawing.Size(203, 22);
+            this.tsOpen.Text = "配置文件(userInfo.xml)";
+            this.tsOpen.Click += new System.EventHandler(this.tsOpen_Click);
             // 
             // groupBox1
             // 
@@ -230,49 +276,12 @@
             this.iconMenu.Visible = true;
             this.iconMenu.DoubleClick += new System.EventHandler(this.iconMenu_DoubleClick);
             // 
-            // cmUser
+            // tsCopyUser
             // 
-            this.cmUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsNewUser,
-            this.tsRePwd,
-            this.toolStripMenuItem1,
-            this.tsDelete,
-            this.tsOpen});
-            this.cmUser.Name = "cmUser";
-            this.cmUser.Size = new System.Drawing.Size(204, 98);
-            // 
-            // tsRePwd
-            // 
-            this.tsRePwd.Name = "tsRePwd";
-            this.tsRePwd.Size = new System.Drawing.Size(172, 22);
-            this.tsRePwd.Text = "重置密码";
-            this.tsRePwd.Click += new System.EventHandler(this.tsRePwd_Click);
-            // 
-            // tsDelete
-            // 
-            this.tsDelete.Name = "tsDelete";
-            this.tsDelete.Size = new System.Drawing.Size(172, 22);
-            this.tsDelete.Text = "删除";
-            this.tsDelete.Click += new System.EventHandler(this.tsDelete_Click);
-            // 
-            // tsNewUser
-            // 
-            this.tsNewUser.Name = "tsNewUser";
-            this.tsNewUser.Size = new System.Drawing.Size(172, 22);
-            this.tsNewUser.Text = "新增用户";
-            this.tsNewUser.Click += new System.EventHandler(this.tsNewUser_Click);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(169, 6);
-            // 
-            // tsOpen
-            // 
-            this.tsOpen.Name = "tsOpen";
-            this.tsOpen.Size = new System.Drawing.Size(203, 22);
-            this.tsOpen.Text = "配置文件(userInfo.xml)";
-            this.tsOpen.Click += new System.EventHandler(this.tsOpen_Click);
+            this.tsCopyUser.Name = "tsCopyUser";
+            this.tsCopyUser.Size = new System.Drawing.Size(203, 22);
+            this.tsCopyUser.Text = "复制此用户配置";
+            this.tsCopyUser.Click += new System.EventHandler(this.TsCopyUser_Click);
             // 
             // FrmMain
             // 
@@ -292,11 +301,11 @@
             this.SizeChanged += new System.EventHandler(this.FrmMain_SizeChanged);
             this.gbMain.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgMembers)).EndInit();
+            this.cmUser.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgRules)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
-            this.cmUser.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -324,6 +333,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsNewUser;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem tsOpen;
+        private System.Windows.Forms.ToolStripMenuItem tsCopyUser;
     }
 }
 
