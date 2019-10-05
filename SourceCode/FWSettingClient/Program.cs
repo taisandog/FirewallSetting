@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SettingLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace FWSettingClient
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             bool canRun = false;
+            FWUser.XmlPath = UserManager.BasePath + "\\accont.xml";
             using (System.Threading.Mutex mutex = new System.Threading.Mutex(true, "FWSettingClient.Mutex", out canRun))
             {
                 if (!canRun)

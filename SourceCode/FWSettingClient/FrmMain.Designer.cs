@@ -30,43 +30,43 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
-            this.btnOK = new System.Windows.Forms.Button();
-            this.btnHidden = new System.Windows.Forms.Button();
+            this.btnUpdate = new System.Windows.Forms.Button();
             this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
             this.chkAuto = new System.Windows.Forms.CheckBox();
-            this.mess = new Library.MessageBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.dgUsers = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.手动同步IPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsSync = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnLoad = new System.Windows.Forms.ToolStripMenuItem();
+            this.csUser = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsAdd = new System.Windows.Forms.ToolStripMenuItem();
+            this.mess = new Library.MessageBox();
+            this.tsHide = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgUsers)).BeginInit();
+            this.menuStrip1.SuspendLayout();
+            this.csUser.SuspendLayout();
             this.SuspendLayout();
             // 
-            // btnOK
+            // btnUpdate
             // 
-            this.btnOK.Location = new System.Drawing.Point(8, 26);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(5);
-            this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(125, 40);
-            this.btnOK.TabIndex = 1;
-            this.btnOK.Text = "手动同步IP";
-            this.btnOK.UseVisualStyleBackColor = true;
-            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
-            // 
-            // btnHidden
-            // 
-            this.btnHidden.Location = new System.Drawing.Point(143, 26);
-            this.btnHidden.Margin = new System.Windows.Forms.Padding(5);
-            this.btnHidden.Name = "btnHidden";
-            this.btnHidden.Size = new System.Drawing.Size(125, 40);
-            this.btnHidden.TabIndex = 2;
-            this.btnHidden.Text = "隐藏";
-            this.btnHidden.UseVisualStyleBackColor = true;
-            this.btnHidden.Click += new System.EventHandler(this.btnHidden_Click);
+            this.btnUpdate.Location = new System.Drawing.Point(14, 26);
+            this.btnUpdate.Margin = new System.Windows.Forms.Padding(5);
+            this.btnUpdate.Name = "btnUpdate";
+            this.btnUpdate.Size = new System.Drawing.Size(133, 40);
+            this.btnUpdate.TabIndex = 2;
+            this.btnUpdate.Text = "同步IP到服务器";
+            this.btnUpdate.UseVisualStyleBackColor = true;
+            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
             // 
             // iconMenu
             // 
@@ -78,7 +78,7 @@
             // chkAuto
             // 
             this.chkAuto.AutoSize = true;
-            this.chkAuto.Location = new System.Drawing.Point(276, 41);
+            this.chkAuto.Location = new System.Drawing.Point(155, 35);
             this.chkAuto.Name = "chkAuto";
             this.chkAuto.Size = new System.Drawing.Size(93, 25);
             this.chkAuto.TabIndex = 5;
@@ -86,25 +86,12 @@
             this.chkAuto.UseVisualStyleBackColor = true;
             this.chkAuto.Click += new System.EventHandler(this.chkAuto_Click);
             // 
-            // mess
-            // 
-            this.mess.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mess.Font = new System.Drawing.Font("宋体", 10F);
-            this.mess.Location = new System.Drawing.Point(3, 25);
-            this.mess.Name = "mess";
-            this.mess.ShowError = true;
-            this.mess.ShowLog = true;
-            this.mess.ShowWarning = true;
-            this.mess.Size = new System.Drawing.Size(637, 283);
-            this.mess.TabIndex = 6;
-            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.chkAuto);
-            this.groupBox1.Controls.Add(this.btnOK);
-            this.groupBox1.Controls.Add(this.btnHidden);
+            this.groupBox1.Controls.Add(this.btnUpdate);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Location = new System.Drawing.Point(0, 25);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(786, 78);
             this.groupBox1.TabIndex = 7;
@@ -115,9 +102,9 @@
             this.groupBox2.Controls.Add(this.mess);
             this.groupBox2.Controls.Add(this.groupBox3);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox2.Location = new System.Drawing.Point(0, 78);
+            this.groupBox2.Location = new System.Drawing.Point(0, 103);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(786, 311);
+            this.groupBox2.Size = new System.Drawing.Size(786, 286);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             // 
@@ -127,7 +114,7 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Right;
             this.groupBox3.Location = new System.Drawing.Point(640, 25);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(143, 283);
+            this.groupBox3.Size = new System.Drawing.Size(143, 258);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "已加载服务";
@@ -142,6 +129,7 @@
             this.dgUsers.ColumnHeadersVisible = false;
             this.dgUsers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn1});
+            this.dgUsers.ContextMenuStrip = this.csUser;
             this.dgUsers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgUsers.Location = new System.Drawing.Point(3, 25);
             this.dgUsers.MultiSelect = false;
@@ -150,7 +138,7 @@
             this.dgUsers.RowHeadersVisible = false;
             this.dgUsers.RowTemplate.Height = 23;
             this.dgUsers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgUsers.Size = new System.Drawing.Size(137, 255);
+            this.dgUsers.Size = new System.Drawing.Size(137, 230);
             this.dgUsers.TabIndex = 2;
             // 
             // dataGridViewTextBoxColumn1
@@ -160,6 +148,95 @@
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.ReadOnly = true;
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.手动同步IPToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(786, 25);
+            this.menuStrip1.TabIndex = 9;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // 手动同步IPToolStripMenuItem
+            // 
+            this.手动同步IPToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsSync,
+            this.btnLoad,
+            this.toolStripMenuItem1,
+            this.tsHide,
+            this.tsExit});
+            this.手动同步IPToolStripMenuItem.Name = "手动同步IPToolStripMenuItem";
+            this.手动同步IPToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.手动同步IPToolStripMenuItem.Text = "文件";
+            // 
+            // tsSync
+            // 
+            this.tsSync.Name = "tsSync";
+            this.tsSync.Size = new System.Drawing.Size(180, 22);
+            this.tsSync.Text = "手动同步ID";
+            this.tsSync.Click += new System.EventHandler(this.TsSync_Click);
+            // 
+            // btnLoad
+            // 
+            this.btnLoad.Name = "btnLoad";
+            this.btnLoad.Size = new System.Drawing.Size(180, 22);
+            this.btnLoad.Text = "载入用户配置";
+            this.btnLoad.Click += new System.EventHandler(this.BtnLoad_Click);
+            // 
+            // csUser
+            // 
+            this.csUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsAdd,
+            this.tsDelete});
+            this.csUser.Name = "csUser";
+            this.csUser.Size = new System.Drawing.Size(101, 48);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // tsExit
+            // 
+            this.tsExit.Name = "tsExit";
+            this.tsExit.Size = new System.Drawing.Size(180, 22);
+            this.tsExit.Text = "退出";
+            this.tsExit.Click += new System.EventHandler(this.TsExit_Click);
+            // 
+            // tsDelete
+            // 
+            this.tsDelete.Name = "tsDelete";
+            this.tsDelete.Size = new System.Drawing.Size(100, 22);
+            this.tsDelete.Text = "删除";
+            this.tsDelete.Click += new System.EventHandler(this.TsDelete_Click);
+            // 
+            // tsAdd
+            // 
+            this.tsAdd.Name = "tsAdd";
+            this.tsAdd.Size = new System.Drawing.Size(100, 22);
+            this.tsAdd.Text = "添加";
+            this.tsAdd.Click += new System.EventHandler(this.TsAdd_Click);
+            // 
+            // mess
+            // 
+            this.mess.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mess.Font = new System.Drawing.Font("宋体", 10F);
+            this.mess.Location = new System.Drawing.Point(3, 25);
+            this.mess.Name = "mess";
+            this.mess.ShowError = true;
+            this.mess.ShowLog = true;
+            this.mess.ShowWarning = true;
+            this.mess.Size = new System.Drawing.Size(637, 258);
+            this.mess.TabIndex = 6;
+            // 
+            // tsHide
+            // 
+            this.tsHide.Name = "tsHide";
+            this.tsHide.Size = new System.Drawing.Size(180, 22);
+            this.tsHide.Text = "隐藏";
+            this.tsHide.Click += new System.EventHandler(this.tsHide_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 21F);
@@ -167,6 +244,7 @@
             this.ClientSize = new System.Drawing.Size(786, 389);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("微软雅黑", 12F);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(5);
@@ -181,14 +259,16 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgUsers)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.csUser.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Button btnOK;
-        private System.Windows.Forms.Button btnHidden;
+        private System.Windows.Forms.Button btnUpdate;
         private System.Windows.Forms.NotifyIcon iconMenu;
         private System.Windows.Forms.CheckBox chkAuto;
         private Library.MessageBox mess;
@@ -197,6 +277,16 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.DataGridView dgUsers;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem 手动同步IPToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsSync;
+        private System.Windows.Forms.ToolStripMenuItem btnLoad;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem tsExit;
+        private System.Windows.Forms.ContextMenuStrip csUser;
+        private System.Windows.Forms.ToolStripMenuItem tsDelete;
+        private System.Windows.Forms.ToolStripMenuItem tsAdd;
+        private System.Windows.Forms.ToolStripMenuItem tsHide;
     }
 }
 

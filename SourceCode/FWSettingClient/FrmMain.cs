@@ -29,10 +29,10 @@ namespace FWSettingClient
         private void FrmMain_Load(object sender, EventArgs e)
         {
             chkAuto.Checked = RegConfig.IsAutoRun;
-            string xml = UserManager.BasePath + "\\accont.xml";
-            _curUser = FWUser.LoadConfig(xml);
+            
+            _curUser = FWUser.LoadConfig();
             dgUsers.AutoGenerateColumns = false;
-            dgUsers.DataSource = _curUser;
+            RefreashUser();
             StartAuto();
             SetTitle();
         }
@@ -92,40 +92,45 @@ namespace FWSettingClient
         {
             iconMenu.Visible = !this.Visible;
         }
-
-        private void btnHidden_Click(object sender, EventArgs e)
-        {
-            this.Hide();
-            SetIconVisable();
-        }
         /// <summary>
         /// 更新IP
         /// </summary>
         private void UpdateIP()
         {
             long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now);
-            foreach (FWUser user in _curUser)
+            Queue<FWUser> que = null;
+            lock (_curUser)
             {
-                APIResault res = user.Handle.UpdateAddress(user.UserName, tick, user.GetSign(tick));
-                if (!res.IsSuccess)
-                {
-                    mess.LogError(user.Name+":"+res.Message);
-                    continue;
-                }
-                mess.Log(user.Name + ":"+DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  进行了IP同步");
+                que = new Queue<FWUser>(_curUser);
             }
+                foreach (FWUser user in que)
+                {
+                    APIResault res = user.Handle.UpdateAddress(user.UserName, tick, user.GetSign(tick));
+                    if (!res.IsSuccess)
+                    {
+                        mess.LogError(user.Name + ":" + res.Message);
+                        continue;
+                    }
+                    mess.Log(user.Name + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  进行了IP同步");
+                }
             
             
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            UpdateIP();
+           
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            StopAuto();
+            if (_running)
+            {
+                e.Cancel = true;
+                this.Hide();
+                SetIconVisable();
+            }
+            //StopAuto();
         }
 
         private void chkAuto_Click(object sender, EventArgs e)
@@ -148,6 +153,74 @@ namespace FWSettingClient
                 return;
             }
             _lastWindowState = this.WindowState;
+        }
+
+        private void TsSync_Click(object sender, EventArgs e)
+        {
+            UpdateIP();
+        }
+
+        private void BtnLoad_Click(object sender, EventArgs e)
+        {
+            FWUser user=FrmLoad.ShowLoad("请输入配置");
+            if (user != null)
+            {
+                lock (_curUser)
+                {
+                    _curUser.Add(user);
+                }
+                FWUser.SaveConfig(_curUser);
+                RefreashUser();
+                UpdateIP();
+            }
+        }
+
+        private void RefreashUser()
+        {
+            dgUsers.DataSource = null;
+            dgUsers.DataSource = _curUser;
+        }
+
+        private void TsExit_Click(object sender, EventArgs e)
+        {
+            StopAuto();
+            this.Close();
+        }
+
+        private void TsAdd_Click(object sender, EventArgs e)
+        {
+            BtnLoad_Click(btnLoad, e);
+        }
+
+        private void TsDelete_Click(object sender, EventArgs e)
+        {
+            if (dgUsers.SelectedRows.Count <= 0)
+            {
+                return;
+            }
+            DataGridViewRow row = dgUsers.SelectedRows[0];
+            int index = row.Index;
+            if (index < 0)
+            {
+                return;
+            }
+            lock (_curUser)
+            {
+                _curUser.RemoveAt(index);
+            }
+            FWUser.SaveConfig(_curUser);
+            RefreashUser();
+        }
+
+        private void tsHide_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            SetIconVisable();
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            UpdateIP();
         }
     }
 }
