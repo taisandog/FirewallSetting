@@ -16,7 +16,7 @@ namespace FirewallSetting
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
+            FWUser.IsServer = true;
             FWUser.XmlPath = UserManager.BasePath + "userInfo.xml";
             Application.Run(new FrmMain());
         }

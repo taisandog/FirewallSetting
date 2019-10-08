@@ -17,6 +17,10 @@ namespace SettingLib
         protected SettingInvoke _handle=new SettingInvoke("");
         public static string XmlPath = null;
         /// <summary>
+        /// 是否服务器
+        /// </summary>
+        public static bool IsServer = false;
+        /// <summary>
         /// 网络请求
         /// </summary>
         [JsonIgnore]
@@ -121,6 +125,10 @@ namespace SettingLib
                 _ip = value;
             }
         }
+
+        private static readonly string ServerName = System.Configuration.ConfigurationManager.AppSettings["Server.Name"];
+
+        private static readonly string ServerUrl = System.Configuration.ConfigurationManager.AppSettings["Server.URL"];
         /// <summary>
         /// 创建新的密钥
         /// </summary>
@@ -183,16 +191,15 @@ namespace SettingLib
             doc.AppendChild(xmlDeclaration);
             XmlNode rootNode = doc.CreateElement("root");
             doc.AppendChild(rootNode);
-            string serverName = System.Configuration.ConfigurationManager.AppSettings["Server.Name"];
-            string serverUrl = System.Configuration.ConfigurationManager.AppSettings["Server.URL"];
+            
             foreach (FWUser user in lstUser)
             {
                 XmlNode item = doc.CreateElement("account");
 
                 XmlAttribute att = doc.CreateAttribute("name");
-                if (!string.IsNullOrWhiteSpace(serverName))
+                if (IsServer)
                 {
-                    att.InnerText = serverName;
+                    att.InnerText = ServerName;
                 }
                 else
                 {
@@ -203,9 +210,9 @@ namespace SettingLib
 
 
                 att = doc.CreateAttribute("url");
-                if (!string.IsNullOrWhiteSpace(serverUrl))
+                if (IsServer)
                 {
-                    att.InnerText = serverUrl;
+                    att.InnerText = ServerUrl;
                 }
                 else
                 {
@@ -236,7 +243,32 @@ namespace SettingLib
         /// <returns></returns>
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this);
+            
+            
+
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            if (IsServer)
+            {
+                
+                dic["Name"] = ServerName;
+            }
+            else
+            {
+                dic["Name"] = _name;
+            }
+            if (IsServer)
+            {
+               
+                dic["Url"] = ServerUrl;
+            }
+            else
+            {
+                dic["Url"] = Url;
+            }
+            dic["UserName"] = _userName;
+            dic["Secret"] = _secret;
+
+            return JsonConvert.SerializeObject(dic);
         }
         /// <summary>
         /// 转换成Json

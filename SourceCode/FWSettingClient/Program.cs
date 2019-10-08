@@ -19,6 +19,7 @@ namespace FWSettingClient
             Application.SetCompatibleTextRenderingDefault(false);
             bool canRun = false;
             FWUser.XmlPath = UserManager.BasePath + "\\accont.xml";
+            FWUser.IsServer = false;
             using (System.Threading.Mutex mutex = new System.Threading.Mutex(true, "FWSettingClient.Mutex", out canRun))
             {
                 if (!canRun)
