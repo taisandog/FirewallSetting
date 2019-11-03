@@ -33,6 +33,9 @@
     <Reference Include="Buffalo.ArgCommon">
       <HintPath>..\dll\Buffalo.ArgCommon.dll</HintPath>
     </Reference>
+    <Reference Include="Buffalo.DB">
+      <HintPath>..\dll\Buffalo.DB.dll</HintPath>
+    </Reference>
     <Reference Include="Buffalo.Kernel">
       <HintPath>..\dll\Buffalo.Kernel.dll</HintPath>
     </Reference>
@@ -63,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="APIWebMethod.cs" />
+    <Compile Include="AppSetting.cs" />
     <Compile Include="FirewallItem.cs" />
     <Compile Include="FWUser.cs" />
     <Compile Include="IFormUpdate.cs" />

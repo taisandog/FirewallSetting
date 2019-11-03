@@ -1,4 +1,5 @@
-﻿using Buffalo.DBTools;
+﻿using Buffalo.DB.CacheManager;
+using Buffalo.DBTools;
 using Library;
 using NetFwTypeLib;
 using SettingLib;
@@ -254,7 +255,10 @@ namespace FirewallSetting
             //INetFwRule2 firewallRule = null;
 
             //firewallRule = firewallPolicy.Rules.Item("Bonjour 服务") as INetFwRule2;
-            
+            QueryCache cache= CacheUnit.CreateCache(BuffaloCacheTypes.Redis, "server=39.108.125.58:6379;throw=1;");
+            string key = "App.BkIP";
+            cache.SetValue<long>(key, 100);
+            object cnt = cache.GetValue(key);
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)

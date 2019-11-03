@@ -1,4 +1,5 @@
 ﻿using Buffalo.ArgCommon;
+using Buffalo.DB.CacheManager;
 using Buffalo.Kernel;
 using Library;
 using SettingLib;
@@ -14,11 +15,27 @@ namespace SettingLib
 {
     public class SettingHandle: INetHandle
     {
+        private QueryCache _cache = LoadCache();
+
+        private static QueryCache LoadCache()
+        {
+            string type = AppSetting.Default["App.CacheType"];
+            string cache = AppSetting.Default["App.Cache"];
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                type = BuffaloCacheTypes.System;
+            }
+            return CacheUnit.CreateCache(type, cache);
+        }
+
         private static APIWebMethod _handle = APIWebMethod.CreateWebMethod(typeof(SettingHandle));
         /// <summary>
         /// 消息
         /// </summary>
         private IShowMessage _message;
+
+
+
         /// <summary>
         /// 消息
         /// </summary>
@@ -81,15 +98,37 @@ namespace SettingLib
 
 
         }
+
+        private static readonly string KeyHead = "App.BkIP_";
+        private static readonly string KeyCntHead = "App.CntIP_";
+        private const int BlockSecond = 60 * 5;
+        private const int BlockTimes = 5;
+
         [System.Web.Services.WebMethod]
         public APIResault UpdateAddress(string args, HttpListenerRequest request)
         {
+            string remoteIP = GetIP(request);
+            string key = KeyHead + remoteIP;
+            
+            long curTick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now);
+            long bTick = _cache.GetValue<long>(key);
+            if (curTick - bTick < BlockSecond)
+            {
+                return ApiCommon.GetFault(remoteIP+"，被写入黑名单");
+            }
+            if (bTick > 0)
+            {
+                _cache.DeleteValue(key);
+            }
+
+            
+
             ArgValues arg = ApiCommon.GetArgs(args);
             long tick = arg.GetDataValue<long>("Tick");
             string name = arg.GetDataValue<string>("Name");
             string sign= arg.GetDataValue<string>("Sign");
 
-            long curTick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now);
+            
             long left = Math.Abs(curTick - tick);
             if(left > 30)
             {
@@ -100,13 +139,31 @@ namespace SettingLib
             {
                 return ApiCommon.GetFault("找不到用户:"+name); 
             }
+
+            string cntkey = KeyCntHead + remoteIP;
+
             string cursign = user.GetSign(tick);
             if (!string.Equals(cursign ,sign,StringComparison.CurrentCultureIgnoreCase))
             {
-                return ApiCommon.GetFault("效验错误");
+
+                int times = _cache.GetValue<int>(cntkey);
+                times++;
+                string err = null;
+                if (times >= BlockTimes)
+                {
+                    _cache.SetValue<long>(key, curTick);
+                    _cache.DeleteValue(cntkey);
+                    err = "效验错误,IP被屏蔽:" + remoteIP;
+                }
+                else
+                {
+                    _cache.SetValue<int>(cntkey, times);
+                    err = "效验错误,错误次数:" + times;
+                }
+                return ApiCommon.GetFault(err);
             }
-            string remoteIP = GetIP(request);
-            if (user.IP== remoteIP)
+            _cache.DeleteValue(cntkey);
+            if (user.IP == remoteIP)
             {
                 return ApiCommon.GetSuccess();
             }

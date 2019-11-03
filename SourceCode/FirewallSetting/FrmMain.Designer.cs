@@ -37,6 +37,7 @@
             this.cmUser = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsNewUser = new System.Windows.Forms.ToolStripMenuItem();
             this.tsRePwd = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsCopyUser = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsDelete = new System.Windows.Forms.ToolStripMenuItem();
             this.tsOpen = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,6 @@
             this.button1 = new System.Windows.Forms.Button();
             this.mbDisplay = new Library.MessageBox();
             this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
-            this.tsCopyUser = new System.Windows.Forms.ToolStripMenuItem();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgMembers)).BeginInit();
             this.cmUser.SuspendLayout();
@@ -120,7 +120,7 @@
             this.tsDelete,
             this.tsOpen});
             this.cmUser.Name = "cmUser";
-            this.cmUser.Size = new System.Drawing.Size(204, 142);
+            this.cmUser.Size = new System.Drawing.Size(204, 120);
             // 
             // tsNewUser
             // 
@@ -135,6 +135,13 @@
             this.tsRePwd.Size = new System.Drawing.Size(203, 22);
             this.tsRePwd.Text = "重置密码";
             this.tsRePwd.Click += new System.EventHandler(this.tsRePwd_Click);
+            // 
+            // tsCopyUser
+            // 
+            this.tsCopyUser.Name = "tsCopyUser";
+            this.tsCopyUser.Size = new System.Drawing.Size(203, 22);
+            this.tsCopyUser.Text = "复制此用户配置";
+            this.tsCopyUser.Click += new System.EventHandler(this.TsCopyUser_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -254,7 +261,6 @@
             this.button1.TabIndex = 1;
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // mbDisplay
@@ -275,13 +281,6 @@
             this.iconMenu.Text = "防火墙白名单服务端";
             this.iconMenu.Visible = true;
             this.iconMenu.DoubleClick += new System.EventHandler(this.iconMenu_DoubleClick);
-            // 
-            // tsCopyUser
-            // 
-            this.tsCopyUser.Name = "tsCopyUser";
-            this.tsCopyUser.Size = new System.Drawing.Size(203, 22);
-            this.tsCopyUser.Text = "复制此用户配置";
-            this.tsCopyUser.Click += new System.EventHandler(this.TsCopyUser_Click);
             // 
             // FrmMain
             // 
