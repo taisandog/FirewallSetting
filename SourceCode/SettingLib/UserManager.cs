@@ -90,6 +90,7 @@ namespace SettingLib
                 }
             }
             _lstUser.Add(user);
+
             return ApiCommon.GetSuccess();
         }
         /// <summary>
@@ -107,20 +108,23 @@ namespace SettingLib
         {
             Dictionary<string, bool> dicExists = new Dictionary<string, bool>();
             List<string> lstIP = new List<string>(_lstUser.Count);
-            string cur = null;
+            List<string> cur = null;
             foreach(FWUser user in _lstUser)
             {
-                cur = user.IP;
-                if (string.IsNullOrWhiteSpace(cur))
+                cur = user.GetIP();
+                foreach (string ip in cur)
                 {
-                    continue;
+                    if (string.IsNullOrWhiteSpace(ip))
+                    {
+                        continue;
+                    }
+                    if (dicExists.ContainsKey(ip))
+                    {
+                        continue;
+                    }
+                    lstIP.Add(ip);
+                    dicExists[ip] = true;
                 }
-                if (dicExists.ContainsKey(cur))
-                {
-                    continue;
-                }
-                lstIP.Add(cur);
-                dicExists[cur] = true;
             }
             foreach (FirewallItem item in _firewallRule)
             {

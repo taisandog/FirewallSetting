@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -107,28 +108,191 @@ namespace SettingLib
             }
         }
 
+        private bool _multipleIP;
         /// <summary>
-        /// IP
+        /// 多IP
         /// </summary>
-        protected string _ip;
-        /// <summary>
-        /// IP
-        /// </summary>
-        public string IP
+        public bool MultipleIP
         {
             get
             {
-                return _ip;
+                return _multipleIP;
             }
+
             set
             {
-                _ip = value;
+                _multipleIP = value;
             }
         }
 
-        private static readonly string ServerName = System.Configuration.ConfigurationManager.AppSettings["Server.Name"];
+        /// <summary>
+        /// IP列表
+        /// </summary>
+        protected List<IpItem> _ipList=null;
+        /// <summary>
+        /// IP
+        /// </summary>
+        public List<IpItem> IPList
+        {
+            get
+            {
+                if (_ipList == null)
+                {
+                    _ipList = new List<IpItem>();
+                }
+                return _ipList;
+            }
+            
+        }
+        
+        /// <summary>
+        /// IP
+        /// </summary>
+        public string IPText
+        {
+            get
+            {
+                List<IpItem> lst = IPList;
+                StringBuilder sbRet = new StringBuilder();
+                lock (lst)
+                {
+                    foreach (IpItem item in lst)
+                    {
+                        sbRet.Append(item.IP);
+                        sbRet.Append(",");
+                    }
+                    if (sbRet.Length > 0)
+                    {
+                        sbRet.Remove(sbRet.Length - 1, 1);
+                    }
+                }
+                return sbRet.ToString();
+            }
+        }
+        /// <summary>
+        /// 更新IP
+        /// </summary>
+        /// <param name="ip"></param>
+        public bool UpdateIP(string ip)
+        {
+            int change = 0;
+            if (_multipleIP)
+            {
+                change +=DeleteOld();
+                change += AddIP(ip);
+            }
+            else
+            {
+                List<IpItem> lst = IPList;
+                lock (lst)
+                {
+                    if (lst.Count == 1)
+                    {
+                        if (lst[0].IP == ip)
+                        {
+                            return false;
+                        }
+                    }
+                    lst.Clear();
+                    AppendIP(ip);
+                    return true;
+                }
+            }
+            return change > 0;
+        }
+        public static int IPTimeOutMilliseconds = 60 * 60 * 1000;
+        /// <summary>
+        /// 删除过期IP
+        /// </summary>
+        private int DeleteOld()
+        {
+            List<IpItem> lst = IPList;
+            int ret = 0;
+            lock (lst)
+            {
+                DateTime now = DateTime.Now;
+                IpItem item = null;
+                for (int i = lst.Count - 1; i >= 0; i--)
+                {
+                    item = lst[i];
+                    if (now.Subtract(item.UpdateDate).TotalMilliseconds > IPTimeOutMilliseconds)
+                    {
+                        lst.RemoveAt(i);
+                    }
+                }
+            }
+            return ret;
+        }
 
-        private static readonly string ServerUrl = System.Configuration.ConfigurationManager.AppSettings["Server.URL"];
+        /// <summary>
+        /// 获取IP
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetIP()
+        {
+            List<string> ret = new List<string>();
+            List<IpItem> lst = IPList;
+            lock (lst)
+            {
+                if (_multipleIP)
+                {
+                    DeleteOld();
+                    foreach (IpItem item in lst)
+                    {
+                        ret.Add(item.IP);
+                    }
+                    
+                    return ret;
+                }
+                if (lst.Count == 1)
+                {
+                    ret.Add(lst[0].IP);
+                }
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// 增加到ID
+        /// </summary>
+        /// <param name="ip"></param>
+        private int AddIP(string ip)
+        {
+            int ret = 0;
+            List<IpItem> lst = IPList;
+            lock (lst)
+            {
+                DateTime now = DateTime.Now;
+                foreach(IpItem item in lst)
+                {
+                    if(item.IP== ip)
+                    {
+                        item.UpdateDate = now;
+                        return 0;
+                    }
+                }
+                AppendIP(ip);
+
+            }
+            return 1;
+        }
+
+        private void AppendIP(string ip)
+        {
+            List<IpItem> lst = IPList;
+            lock (lst)
+            {
+                DateTime now = DateTime.Now;
+                IpItem nitem = new IpItem();
+                nitem.UpdateDate = now;
+                nitem.IP = ip;
+                lst.Add(nitem);
+            }
+        }
+
+        public static readonly string ServerName = System.Configuration.ConfigurationManager.AppSettings["Server.Name"];
+
+        public static readonly string ServerUrl = System.Configuration.ConfigurationManager.AppSettings["Server.URL"];
         /// <summary>
         /// 创建新的密钥
         /// </summary>
@@ -229,8 +393,13 @@ namespace SettingLib
                 att.InnerText = user.Secret;
                 item.Attributes.Append(att);
 
-                att = doc.CreateAttribute("ip");
-                att.InnerText = user.IP;
+                att = doc.CreateAttribute("iplist");
+                
+                att.InnerText = JsonConvert.SerializeObject(user.IPList);
+                item.Attributes.Append(att);
+
+                att = doc.CreateAttribute("multipleIP");
+                att.InnerText = user.MultipleIP?"1":"0";
                 item.Attributes.Append(att);
 
                 rootNode.AppendChild(item);
@@ -286,43 +455,105 @@ namespace SettingLib
         public static List<FWUser> LoadConfig()
         {
             //string xml = UserManager.BasePath + "\\accont.xml";
-            XmlDocument doc = new XmlDocument();
-            doc.Load(XmlPath);
-            XmlNodeList lstRule = doc.GetElementsByTagName("account");
             List<FWUser> lstRet = new List<FWUser>();
-            FWUser user = null;
-            foreach (XmlNode node in lstRule)
+            if (!File.Exists(XmlPath))
             {
-                user = new FWUser();
-                XmlAttribute att = node.Attributes["name"];
-                if (att != null)
-                {
-                    user.Name = att.InnerText;
-                }
+                return lstRet;
+            }
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(XmlPath);
+                XmlNodeList lstRule = doc.GetElementsByTagName("account");
 
-                att = node.Attributes["url"];
-                if (att != null)
+                FWUser user = null;
+                foreach (XmlNode node in lstRule)
                 {
-                    user.Url = att.InnerText;
+                    user = new FWUser();
+                    XmlAttribute att = node.Attributes["name"];
+                    if (att != null)
+                    {
+                        user.Name = att.InnerText;
+                    }
+
+                    att = node.Attributes["url"];
+                    if (att != null)
+                    {
+                        user.Url = att.InnerText;
+                    }
+                    att = node.Attributes["username"];
+                    if (att != null)
+                    {
+                        user.UserName = att.InnerText;
+                    }
+                    att = node.Attributes["secretkey"];
+                    if (att != null)
+                    {
+                        user.Secret = att.InnerText;
+                    }
+                    att = node.Attributes["iplist"];
+                    if (att != null)
+                    {
+                        user._ipList =JsonConvert.DeserializeObject<List<IpItem>>( att.InnerText);
+                    }
+                    att = node.Attributes["multipleIP"];
+                    if (att != null)
+                    {
+                        user.MultipleIP = att.InnerText=="1";
+                    }
+                    lstRet.Add(user);
                 }
-                att = node.Attributes["username"];
-                if (att != null)
-                {
-                    user.UserName = att.InnerText;
-                }
-                att = node.Attributes["secretkey"];
-                if (att != null)
-                {
-                    user.Secret = att.InnerText;
-                }
-                att = node.Attributes["ip"];
-                if (att != null)
-                {
-                    user.IP = att.InnerText;
-                }
-                lstRet.Add(user);
+                
+            }
+            catch
+            {
+
             }
             return lstRet;
+        }
+    }
+
+    /// <summary>
+    /// IP项信息
+    /// </summary>
+    public class IpItem
+    {
+        /// <summary>
+        /// IP
+        /// </summary>
+        protected string _ip;
+        /// <summary>
+        /// IP
+        /// </summary>
+        public string IP
+        {
+            get
+            {
+                return _ip;
+            }
+            set
+            {
+                _ip = value;
+            }
+        }
+
+        /// <summary>
+        /// 更新日期
+        /// </summary>
+        protected DateTime _updateDate;
+        /// <summary>
+        /// 更新日期
+        /// </summary>
+        public DateTime UpdateDate
+        {
+            get
+            {
+                return _updateDate;
+            }
+            set
+            {
+                _updateDate = value;
+            }
         }
     }
 }

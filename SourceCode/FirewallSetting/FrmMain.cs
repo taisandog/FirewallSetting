@@ -379,6 +379,11 @@ namespace FirewallSetting
             }
             FrmText.ShowText("用户:" + user.UserName + "的配置", user.ToJson());
         }
+
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            _userMan.SaveConfig();
+        }
     }
     
 }
