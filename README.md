@@ -1,6 +1,4 @@
 # Windows动态设置服务器防火墙白名单  
-**免源码下载**  
-https://github.com/taisandog/FirewallSetting.git/trunk/Release  
 **场景分析**  
 租用了Windows服务器后，开启了远程桌面，哪怕改了端口其实都很多外部IP尝试登陆，如果你的家里或办公地方是动态IP的话，设置白名单就相当麻烦，本项目通过签名安全机制，让用户客户端的机器自动同步IP到服务器白名单，并且5分钟同步一次
 
