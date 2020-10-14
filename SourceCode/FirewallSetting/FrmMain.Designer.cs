@@ -41,18 +41,19 @@
             this.tsOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.dgRules = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
             this.Btn_Disconnect = new System.Windows.Forms.Button();
             this.Btn_Connect = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
             this.btnSave = new System.Windows.Forms.Button();
+            this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
             this.mbDisplay = new Library.MessageBox();
             this.ColUserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColMultipleIP = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgMembers)).BeginInit();
             this.cmUser.SuspendLayout();
@@ -94,7 +95,7 @@
             this.dgMembers.RowHeadersVisible = false;
             this.dgMembers.RowTemplate.Height = 23;
             this.dgMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgMembers.Size = new System.Drawing.Size(811, 222);
+            this.dgMembers.Size = new System.Drawing.Size(761, 222);
             this.dgMembers.TabIndex = 1;
             // 
             // cmUser
@@ -153,9 +154,9 @@
             // 
             this.groupBox1.Controls.Add(this.dgRules);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.groupBox1.Location = new System.Drawing.Point(814, 25);
+            this.groupBox1.Location = new System.Drawing.Point(764, 25);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(143, 222);
+            this.groupBox1.Size = new System.Drawing.Size(193, 222);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "已加载规则";
@@ -169,7 +170,8 @@
             this.dgRules.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgRules.ColumnHeadersVisible = false;
             this.dgRules.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1});
+            this.dataGridViewTextBoxColumn1,
+            this.ColNumber});
             this.dgRules.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgRules.Location = new System.Drawing.Point(3, 25);
             this.dgRules.MultiSelect = false;
@@ -178,15 +180,8 @@
             this.dgRules.RowHeadersVisible = false;
             this.dgRules.RowTemplate.Height = 23;
             this.dgRules.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgRules.Size = new System.Drawing.Size(137, 194);
+            this.dgRules.Size = new System.Drawing.Size(187, 194);
             this.dgRules.TabIndex = 2;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "Name";
-            this.dataGridViewTextBoxColumn1.HeaderText = "名字";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
             // 
             // panel1
             // 
@@ -240,13 +235,6 @@
             this.panel2.Size = new System.Drawing.Size(327, 56);
             this.panel2.TabIndex = 1;
             // 
-            // iconMenu
-            // 
-            this.iconMenu.Icon = ((System.Drawing.Icon)(resources.GetObject("iconMenu.Icon")));
-            this.iconMenu.Text = "防火墙白名单服务端";
-            this.iconMenu.Visible = true;
-            this.iconMenu.DoubleClick += new System.EventHandler(this.iconMenu_DoubleClick);
-            // 
             // btnSave
             // 
             this.btnSave.Location = new System.Drawing.Point(3, 11);
@@ -256,6 +244,13 @@
             this.btnSave.Text = "保存配置";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.BtnSave_Click);
+            // 
+            // iconMenu
+            // 
+            this.iconMenu.Icon = ((System.Drawing.Icon)(resources.GetObject("iconMenu.Icon")));
+            this.iconMenu.Text = "防火墙白名单服务端";
+            this.iconMenu.Visible = true;
+            this.iconMenu.DoubleClick += new System.EventHandler(this.iconMenu_DoubleClick);
             // 
             // mbDisplay
             // 
@@ -272,7 +267,7 @@
             // ColUserName
             // 
             this.ColUserName.DataPropertyName = "UserName";
-            this.ColUserName.FillWeight = 111.9289F;
+            this.ColUserName.FillWeight = 76.99991F;
             this.ColUserName.HeaderText = "名字";
             this.ColUserName.Name = "ColUserName";
             this.ColUserName.ReadOnly = true;
@@ -280,7 +275,7 @@
             // ColIP
             // 
             this.ColIP.DataPropertyName = "IPText";
-            this.ColIP.FillWeight = 111.9289F;
+            this.ColIP.FillWeight = 123.8578F;
             this.ColIP.HeaderText = "IP";
             this.ColIP.Name = "ColIP";
             this.ColIP.ReadOnly = true;
@@ -288,10 +283,26 @@
             // ColMultipleIP
             // 
             this.ColMultipleIP.DataPropertyName = "MultipleIP";
-            this.ColMultipleIP.FillWeight = 20.14214F;
+            this.ColMultipleIP.FillWeight = 43.14219F;
             this.ColMultipleIP.HeaderText = "多IP";
             this.ColMultipleIP.Name = "ColMultipleIP";
             this.ColMultipleIP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "Name";
+            this.dataGridViewTextBoxColumn1.FillWeight = 169.5432F;
+            this.dataGridViewTextBoxColumn1.HeaderText = "名字";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            // 
+            // ColNumber
+            // 
+            this.ColNumber.DataPropertyName = "RuleCount";
+            this.ColNumber.FillWeight = 30.45686F;
+            this.ColNumber.HeaderText = "个数";
+            this.ColNumber.Name = "ColNumber";
+            this.ColNumber.ReadOnly = true;
             // 
             // FrmMain
             // 
@@ -332,7 +343,6 @@
         private System.Windows.Forms.Button Btn_Connect;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.DataGridView dgRules;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.NotifyIcon iconMenu;
         private System.Windows.Forms.ContextMenuStrip cmUser;
         private System.Windows.Forms.ToolStripMenuItem tsRePwd;
@@ -345,6 +355,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ColUserName;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColIP;
         private System.Windows.Forms.DataGridViewCheckBoxColumn ColMultipleIP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ColNumber;
     }
 }
 
