@@ -35,8 +35,8 @@ Server.AllowIP  预设IP，例如本服务器允许几个内网地址
 ***客户端***
 \Client\App_Data\accont.xml
 
-到服务器界面，右击用户框，选择“配置文件(userInfo.xml)”,打开userInfo.xml，拷贝此用户对应的xml行  
-如：`<account name="测试服务器(前端服务)" url="http://127.0.0.1:8789" username="myuser" secretkey="8003b9ab3febbf48a7b8600231b49eb3-1dd69de126f3a14aa61d8924193e185e-0e0908d2b574ec42a2fef0d30a29f4d8" ip="" />`  
-复制到accont.xml里边  
-直接打开客户端就可以同步到服务器了
+到服务器界面，右击***用户信息***-->选择***复制此用户配置***-->复制弹出框内容
+如：`<account name="服务器" url="http://127.0.0.1:8789" username="myuser" secretkey="8003b9ab3febbf48a7b8600231b49eb3-1dd69de126f3a14aa61d8924193e185e-0e0908d2b574ec42a2fef0d30a29f4d8" ip="" />`  
+
+客户端右击***已加载服务***列表-->选***添加***-->在弹出窗口中粘贴服务器复制的内容
 
