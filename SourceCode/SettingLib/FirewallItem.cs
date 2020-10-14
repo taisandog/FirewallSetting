@@ -9,11 +9,11 @@ namespace SettingLib
 {
     public class FirewallItem
     {
-        private INetFwRule2 _rule;
+        private IList<INetFwRule2> _rule;
         /// <summary>
         /// 规则
         /// </summary>
-        public INetFwRule2 Rule
+        public IList<INetFwRule2> Rule
         {
             get
             {
@@ -22,6 +22,20 @@ namespace SettingLib
             set
             {
                 _rule = value;
+            }
+        }
+        /// <summary>
+        /// 规则个数
+        /// </summary>
+        public int RuleCount 
+        {
+            get 
+            {
+                if (_rule == null) 
+                {
+                    return 0;
+                }
+                return _rule.Count;
             }
         }
 

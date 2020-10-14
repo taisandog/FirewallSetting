@@ -41,10 +41,11 @@ namespace SettingLib
         /// <param name="name">规则名</param>
         /// <param name="applicationPath">应用程序名</param>
         /// <returns></returns>
-        public static INetFwRule2 FindRule(string ruleName, string applicationPath,string remotePorts,string localPorts, 
+        public static IList<INetFwRule2> FindRule(string ruleName, string applicationPath,string remotePorts,string localPorts, 
             string direction)
         {
-            NET_FW_RULE_DIRECTION_ dir = GetDirect(direction);
+            List<INetFwRule2> ret = new List<INetFwRule2>();
+           NET_FW_RULE_DIRECTION_ dir = GetDirect(direction);
                INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
             foreach (INetFwRule2 firewallRule in firewallPolicy.Rules)
             {
@@ -69,9 +70,9 @@ namespace SettingLib
                 {
                     continue;
                 }
-                return firewallRule;
+                ret.Add(firewallRule);
             }
-            return null;
+            return ret;
         }
         /// <summary>
         /// 获取规则类型
@@ -131,8 +132,12 @@ namespace SettingLib
         /// </summary>
         /// <param name="ipArr"></param>
         /// <returns></returns>
-        public static string SetWhiteIP(INetFwRule2 firewallRule, IEnumerable<string> whiteips)
+        public static string SetWhiteIP(IList<INetFwRule2> firewallRule, IEnumerable<string> whiteips)
         {
+            if(firewallRule==null || firewallRule.Count <= 0) 
+            {
+                return null;
+            }
             //firewallRule.Enabled = true;
             StringBuilder sbIP = new StringBuilder();
             foreach (string str in whiteips)
@@ -151,9 +156,11 @@ namespace SettingLib
             {
                 sbIP.Remove(sbIP.Length - 1, 1);
             }
-
-            firewallRule.RemoteAddresses = sbIP.ToString();
-
+            string setIP = sbIP.ToString();
+            foreach (INetFwRule2 rules in firewallRule)
+            {
+                rules.RemoteAddresses = setIP;
+            }
             return null;
         }
     }
