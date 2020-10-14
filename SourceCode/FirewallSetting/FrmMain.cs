@@ -174,8 +174,8 @@ namespace FirewallSetting
 
                 att = node.Attributes["direction"];
                 direction = att.InnerText;
-                INetFwRule2 netrule = WinFirewallUnit.FindRule(ruleName, rulePath, remotePorts, localPorts, direction);
-                if (netrule == null)
+                IList<INetFwRule2> netrule = WinFirewallUnit.FindRule(ruleName, rulePath, remotePorts, localPorts, direction);
+                if (netrule == null || netrule.Count<=0)
                 {
                     if (ShowError)
                     {
