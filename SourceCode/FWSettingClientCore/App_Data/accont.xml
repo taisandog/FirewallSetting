@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <account name="巨星" url="http://47.242.167.75:8789" username="officenet" secretkey="e2212a2b63460e4ea6a57e7c7d31de44-1365a2907141734f81ec6eee23f92600-1083243b5020024eb7a5c3055c322b4b" ip="" />
+  <account name="Game前端服务器" url="http://39.108.164.149:8789" username="developer" secretkey="7e831c7e5017904ea8805076a1315477-a6e8c1e933ab2f4c9eddeaa12bb8de42-adb5741f456b1441802ea626902356c0" ip="" />
+  <account name="数据库、SVN测试服" url="http://39.108.125.58:8789" username="company" secretkey="551aef29dc0b6c43be4143906b8a59a6-e75658b3e0b43f4788b1e7ba08fb6e0d-deac336ffa1dd2429c44554abe46919d" ip="" />
+  <account name="速聊服务器" url="http://8.210.61.221:8789" username="developer" secretkey="0067172c59dd6c45ada855b716ee0fa3-63428f44afa92c4987c59200e9462eba-12d3922920420844b47dede8fef97924" ip="" />
+  <account name="渔乐国际" url="http://47.57.68.252:8789" username="officenet" secretkey="fd2be7ebd618c342adc24fb59d9f47f5-2df330caa8f6894e9505b03f9fc271ae-3a23863a6843c344b56a871724dd093b" ip="" />
+  <account name="Game前端服务器" url="http://39.108.164.149:8789" username="HJJ" secretkey="6386c54fe619714ea12b4aecb9dfa2c4-967ad308924d904ba8e6c53e0d9c25c2-19552d0c556f2a4fbc3ef84559229f65" iplist="[]" multipleIP="0" />
+</root>
