@@ -1,0 +1,61 @@
+yum install epel-release
+yum install supervisor
+systemctl enable supervisord.service
+systemctl start supervisord.service
+systemctl restart supervisord.service
+
+sudo dnf install dotnet-sdk-5.0
+===查看===
+systemctl status supervisord.service
+
+===增加supervisord程序托管===
+/etc/supervisord.conf
+
+添加
+/etc/supervisord.d/firewallsetting.ini
+
+[program:firewallsetting]
+command=dotnet FirewallSettingServerCore.dll ; 输入执行命令，这里表示 dotnet  Deploy.Linux.dll
+directory=/opt/FirewallSetting/ ; 应用程序根目录 
+autostart=true ; 是否自动启动，当 supervisor 加载该配置文件的时候立即启动它 
+autorestart=true ; 是否自动重启，当执行 dotnet  FirewallSettingServerCore.dll 启动失败时，会重复的自动重启 
+logfile_maxbytes=50MB ; 该配置文件输出单个日志文件的大小 
+logfile_backups=10 ; 日志备份个数 
+loglevel=info ; 记录日志级别 
+stderr_logfile=/data/logs/FirewallSetting/FirewallSetting.err.log ; 指定标准错误输出日志文件 
+stdout_logfile=/data/logs/FirewallSetting/FirewallSetting.out.log ; 指定标准输出日志文件 
+environment=ASPNETCORE_ENVIRONMENT=Production ; 可配置环境变量，该环境变量将通过执行 dotnet  Deploy.Linux.dll 命令的时候传入到 .NET Core 应用程序中  
+user=root ;启动服务的用户  
+stopsignal=INT
+redirect_stderr=true
+
+
+====添加supervisord的web界面=========
+
+/etc/supervisord.conf
+
+头部去掉注释
+[inet_http_server]         ; inet (TCP) server disabled by default
+port=0.0.0.0:9001        ; (ip_address:port specifier, *:port for all iface)
+username=user              ; (default is no username (open server))
+password=123               ; (default is no password (open server))
+
+
+===supervisord使用===
+supervisorctl fg firewallsetting  //进入管理firewallsetting程序
+supervisorctl start firewallsetting  //打开firewallsetting程序
+supervisorctl stop firewallsetting  //关闭firewallsetting程序
+supervisorctl restart firewallsetting  //重新firewallsetting程序
+===添加白名单===
+firewall-cmd --zone=public --add-port=8789/tcp --permanent
+
+
+
+firewall-cmd --permanent --add-rich-rule="rule family="ipv4" source address="192.168.31.25" port protocol="tcp" port="9001" accept"
+systemctl restart firewalld.service
+
+firewall-cmd --permanent --remove-rich-rule="rule family="ipv4" source address="192.168.142.166" port protocol="tcp" port="11300" accept"
+firewall-cmd --list-rich-rules
+
+firewall-cmd --reload
+
