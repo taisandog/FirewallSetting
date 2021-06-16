@@ -1,5 +1,6 @@
 ﻿using Buffalo.ArgCommon;
 using Buffalo.Kernel;
+using Renci.SshNet;
 using SettingLib;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,8 @@ namespace FWSettingClientCore
 
         static void Main(string[] args)
         {
-            
+            var ssh = new SshClient("192.168.130.198", "root", "1012"); //创建ssh连接对象
+
             FWUser.XmlPath = CommonMethods.GetBaseRoot("App_Data\\accont.xml");
             FWUser.IsServer = false;
 

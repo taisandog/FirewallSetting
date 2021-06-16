@@ -109,7 +109,7 @@ namespace SettingLib
             string remoteIP = GetIP(request);
             string blockkey = KeyHead + remoteIP;
 
-            long curTick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now);
+            long curTick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now, true, true);
 
             APIResault res = CheckBlockIP(blockkey,remoteIP, curTick);
             if (!res.IsSuccess) 

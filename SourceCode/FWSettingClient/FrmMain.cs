@@ -97,7 +97,7 @@ namespace FWSettingClient
         /// </summary>
         private void UpdateIP()
         {
-            long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now);
+            long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now,true,true);
             Queue<FWUser> que = null;
             lock (_curUser)
             {

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="App_Data\firewallRule.xml" />
+    <None Remove="App_Data\userInfo.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="App_Data\firewallRule.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\userInfo.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FirewallSettingSSHLib\FirewallSettingSSHLib.csproj" />
+  </ItemGroup>
+
+</Project>
