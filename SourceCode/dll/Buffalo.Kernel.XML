@@ -194,16 +194,34 @@
             <param name="xml">xml字符串</param>
             <returns></returns>
         </member>
+        <member name="M:Buffalo.Kernel.CommonMethods.ConvertIntDateTime(System.Double,System.Boolean,System.Boolean)">
+            <summary>
+            将时间戳转换为DateTime类型时间
+            </summary>
+            <param name="d">double 型数字</param>
+            <param name="useSecond">true传入的是秒数,false传入的是毫秒数</param>
+            <param name="isUTC">时间戳是否格林威治标准时间</param>
+            <returns>DateTime</returns>
+        </member>
         <member name="M:Buffalo.Kernel.CommonMethods.ConvertIntDateTime(System.Double)">
             <summary>
-            将Unix时间戳转换为DateTime类型时间
+            将UTC时间戳转换为UTC的DateTime类型时间(秒数)
             </summary>
             <param name="d">double 型数字</param>
             <returns>DateTime</returns>
         </member>
+        <member name="M:Buffalo.Kernel.CommonMethods.ConvertDateTimeInt(System.DateTime,System.Boolean,System.Boolean)">
+            <summary>
+            将c# DateTime时间格式转换为时间戳格式
+            </summary>
+            <param name="time">时间</param>
+             <param name="useSecond">true返回秒数,false返回毫秒数</param>
+             <param name="isUTC">是否返回格林威治标准时间戳</param>
+            <returns>double</returns>
+        </member>
         <member name="M:Buffalo.Kernel.CommonMethods.ConvertDateTimeInt(System.DateTime)">
             <summary>
-            将c# DateTime时间格式转换为Unix时间戳格式
+            将c# DateTime时间格式转换为Unix时间戳格式(秒)
             </summary>
             <param name="time">时间</param>
             <returns>double</returns>
@@ -679,6 +697,13 @@
             获取类型的默认值
             </summary>
             <param name="targetType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Buffalo.Kernel.Defaults.DefaultValue.ConvertEnumUnderlyingValue(System.Object)">
+            <summary>
+            转换枚举为基础类型
+            </summary>
+            <param name="enumValue"></param>
             <returns></returns>
         </member>
         <member name="P:Buffalo.Kernel.Defaults.TypeItem.ItemType">
