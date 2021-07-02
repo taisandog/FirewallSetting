@@ -151,9 +151,9 @@ namespace FirewallSettingServerCore
             if (command.Count < 2 ) 
             {
                 Console.WriteLine("请输入动作:");
-                Console.WriteLine("show=显示用户的json");
-                Console.WriteLine("add=新增用户");
-                Console.WriteLine("renew=刷新用户安全码");
+                Console.WriteLine("show=显示用户的json(user show name)");
+                Console.WriteLine("add=新增用户，是否多IP(user add name 1)");
+                Console.WriteLine("renew=刷新用户安全码,重新设置是否多IP(user renew name 1)");
                 return;
             }
             string action = command[1];
@@ -177,9 +177,11 @@ namespace FirewallSettingServerCore
             }
             else if (string.Equals(action, "add", StringComparison.CurrentCultureIgnoreCase))
             {
+                
                 user = new FWUser();
                 user.UserName = name;
                 user.Secret = FWUser.CreateSecret();
+                user.MultipleIP = LoadIsMultiple(command);
                 _userMan.AddUser(user);
                 _userMan.SaveConfig();
             }
@@ -193,6 +195,7 @@ namespace FirewallSettingServerCore
                 }
 
                 user.Secret = FWUser.CreateSecret();
+                user.MultipleIP = LoadIsMultiple(command);
                 _userMan.SaveConfig();
             }
             else 
@@ -204,6 +207,20 @@ namespace FirewallSettingServerCore
             Console.WriteLine("用户配置:" + json);
         }
 
+        /// <summary>
+        /// 加载是否多IP
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        private static bool LoadIsMultiple(List<string> command) 
+        {
+            string isMultiple = "0";
+            if (command.Count > 3)
+            {
+                isMultiple = command[3];
+            }
+            return isMultiple=="1";
+        }
         private static bool StartApiServices(Program my)
         {
             

@@ -234,9 +234,9 @@ namespace SettingLib
             List<IpItem> lst = IPList;
             lock (lst)
             {
+                DeleteOld();
                 if (_multipleIP)
                 {
-                    DeleteOld();
                     foreach (IpItem item in lst)
                     {
                         ret.Add(item.IP);
