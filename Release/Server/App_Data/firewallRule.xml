@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<root>
-<rule name="远程桌面" ruleName="Open RDP Port 3389" rulePath=""
-      remotePorts="" localPorts="3389" direction="IN"/>
-</root>
