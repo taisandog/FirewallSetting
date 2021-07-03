@@ -1,4 +1,6 @@
-﻿using Buffalo.Kernel;
+﻿using Buffalo.ArgCommon;
+using Buffalo.Kernel;
+using FirewallSettingSSHLib.FWAdapter;
 using Library;
 using Renci.SshNet;
 using SettingLib;
@@ -15,7 +17,7 @@ namespace FirewallSettingServerCore
         private static UserManager _userMan;
         private static WebServer _server;
         private static readonly string FirewallRule = System.Configuration.ConfigurationManager.AppSettings["Firewall.Rule"];
-       
+        
         public bool ShowLog
         {
             get
@@ -44,13 +46,19 @@ namespace FirewallSettingServerCore
         {
             FWUser.XmlPath = CommonMethods.GetBaseRoot("App_Data/userInfo.xml") ;
             _userMan = new UserManager();
-            _userMan.LoadUser();
+            APIResault res=_userMan.LoadInfo();
+            if (!res.IsSuccess) 
+            {
+                Console.WriteLine(res.Message);
+                return;
+            }
+            Console.WriteLine("FirewallType:"+ _userMan.FWHandle.Name);
             FWUser.IsServer = true;
             try
             {
                 
                 List<FirewallItem> rule = GetRule();
-                _userMan.FirewallRule = rule;
+                _userMan.FWHandle.FirewallRule = rule;
                 if (!StartApiServices(new Program()))
                 {
                     return;

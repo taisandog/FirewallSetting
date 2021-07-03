@@ -1,5 +1,6 @@
 ﻿using Buffalo.ArgCommon;
 using Buffalo.Kernel;
+using FirewallSettingSSHLib.FWAdapter;
 using Newtonsoft.Json;
 using Renci.SshNet;
 using System;
@@ -18,62 +19,55 @@ namespace SettingLib
     {
 
         public static readonly string BasePath = CommonMethods.GetBaseRoot("App_Data\\") ;
-        //private static SshClient _ssh;
-        ///// <summary>
-        ///// SSH连接
-        ///// </summary>
-        //public SshClient SSHClient
-        //{
-        //    get
-        //    {
-        //        return _ssh;
-        //    }
-        //    set
-        //    {
-        //        _ssh = value;
-        //    }
-        //}
-
-        private List<FirewallItem> _firewallRule;
         /// <summary>
-        /// 防火墙规则名
+        /// 防火墙接口
         /// </summary>
-        public List<FirewallItem> FirewallRule
+        private FWAdapterBase _fwHandle;
+
+        /// <summary>
+        /// 防火墙接口
+        /// </summary>
+        public FWAdapterBase FWHandle 
         {
             get
             {
-                return _firewallRule;
-            }
-            set
-            {
-                _firewallRule=value;
-            }
-        }
-
-        private List<FWUser> _lstUser;
-
-        /// <summary>
-        /// 所有用户
-        /// </summary>
-        public List<FWUser> AllUser
-        {
-            get
-            {
-                return _lstUser;
+                return _fwHandle;
             }
         }
 
         private static readonly Encoding DefaultEncoding = Encoding.UTF8;
         /// <summary>
-        /// 加载用户信息
+        /// 加载信息
         /// </summary>
-        public void LoadUser()
+        public APIResault LoadInfo()
         {
 
-            
+            _fwHandle = LoadAdapter();
 
-            _lstUser = FWUser.LoadConfig();
+            if (_fwHandle==null) 
+            {
+                return ApiCommon.GetFault("没有可用的防火墙进程");
+            }
+            _fwHandle.AllUser= FWUser.LoadConfig();
+
+            return ApiCommon.GetSuccess();
         }
+
+        private FWAdapterBase LoadAdapter()
+        {
+            using (SshClient ssh = FirewallUnit.CreateSsh())
+            {
+                ssh.Connect();
+                FirewalldAdapter fwAdp = new FirewalldAdapter();
+                if (fwAdp.CheckEnable(ssh)) 
+                {
+                    return fwAdp;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// 根据名字获取用户
         /// </summary>
@@ -81,7 +75,7 @@ namespace SettingLib
         /// <returns></returns>
         public FWUser GetUser(string name)
         {
-            foreach (FWUser u in _lstUser)
+            foreach (FWUser u in _fwHandle.AllUser)
             {
                 if (u.UserName == name)
                 {
@@ -98,14 +92,14 @@ namespace SettingLib
         /// <returns></returns>
         public APIResault AddUser(FWUser user)
         {
-            foreach(FWUser u in _lstUser)
+            foreach(FWUser u in _fwHandle.AllUser)
             {
                 if (u.UserName == user.UserName)
                 {
                     return ApiCommon.GetFault("已存在用户:" + user.UserName);
                 }
             }
-            _lstUser.Add(user);
+            _fwHandle.AllUser.Add(user);
 
             return ApiCommon.GetSuccess();
         }
@@ -115,26 +109,20 @@ namespace SettingLib
         public void SaveConfig()
         {
             string path = BasePath + "userInfo.xml";
-            FWUser.SaveConfig( _lstUser);
+            FWUser.SaveConfig(_fwHandle.AllUser);
         }
         /// <summary>
         /// 刷新到防火墙信息
         /// </summary>
         public void RefreashFirewall()
         {
-            List<string> lstIP = LoadUserIP();
-
-            
-
-           
-
-           
+            List<string> lstIP =_fwHandle.LoadUserIP();
             using (SshClient ssh = FirewallUnit.CreateSsh())
             {
                 ssh.Connect();
                 //对别哪些需要执行
-                Dictionary<string, FirewallRule> dicExistsRule = LoadExists( ssh);
-                List<string> cmd = CreateCMD(lstIP, dicExistsRule);
+                
+                List<string> cmd =_fwHandle.CreateCommand(ssh);
                 foreach (string command in cmd)
                 {
                     SshCommand res = ssh.RunCommand(command);
@@ -143,177 +131,9 @@ namespace SettingLib
                         Console.WriteLine(res.Error);
                     }
                 }
-                ssh.RunCommand("firewall-cmd --reload");
+                _fwHandle.ReLoad(ssh);
             }
         }
-        /// <summary>
-        /// 创建指令
-        /// </summary>
-        /// <returns></returns>
-        private List<string> CreateCMD(List<string> lstIP,  Dictionary<string, FirewallRule> dicExistsRule)
-        {
-            
-            List<FirewallRule> lstCreateItem = new List<FirewallRule>();//需要创建的列表
-            foreach (string ip in lstIP)
-            {
-                foreach (FirewallItem fwItem in _firewallRule)
-                {
-                    //int port = kvpPort.Key;
-                    string key = GetKey(ip, fwItem.Port, fwItem.Protocol);
-                    if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
-                    {
-                        dicExistsRule.Remove(key);
-                        continue;
-                    }
-                    lstCreateItem.Add(new FirewallRule(ip, fwItem.Port, fwItem.Protocol));
-                }
-            }
-
-            List<string> cmd = new List<string>();
-
-            foreach (FirewallRule rule in lstCreateItem)
-            {
-                cmd.Add(rule.CreateAddCommand());//增加白名单命令
-            }
-            foreach (KeyValuePair<string, FirewallRule> kvpRule in dicExistsRule)
-            {
-                FirewallRule rule = kvpRule.Value;
-                cmd.Add(rule.CreateDeleteCommand());//删除白名单命令
-            }
-
-
-            return cmd;
-        }
-
-        /// <summary>
-        /// 加载规则端口
-        /// </summary>
-        /// <returns></returns>
-        private Dictionary<int, bool> LoadRulePort()
-        {
-            //加载接管的端口
-            Dictionary<int, bool> dicPort = new Dictionary<int, bool>();
-            foreach (FirewallItem item in _firewallRule)
-            {
-                dicPort[item.Port] = true;
-            }
-            return dicPort;
-        }
-
-        /// <summary>
-        /// 加载用户IP
-        /// </summary>
-        /// <returns></returns>
-        private List<string> LoadUserIP() 
-        {
-            string lanIP = System.Configuration.ConfigurationManager.AppSettings["Server.AllowIP"];
-            Dictionary<string, bool> dicExists = new Dictionary<string, bool>();
-            List<string> lstIP = new List<string>(_lstUser.Count);
-            List<string> cur = null;
-            if (!string.IsNullOrWhiteSpace(lanIP))
-            {
-                lstIP.Add(lanIP);
-            }
-            foreach (FWUser user in _lstUser)
-            {
-                cur = user.GetIP();
-                foreach (string ip in cur)
-                {
-                    if (string.IsNullOrWhiteSpace(ip))
-                    {
-                        continue;
-                    }
-                    if (dicExists.ContainsKey(ip))
-                    {
-                        continue;
-                    }
-                    lstIP.Add(ip);
-                    dicExists[ip] = true;
-                }
-            }
-            return lstIP;
-        }
-
-        /// <summary>
-        /// 加载现存规则
-        /// </summary>
-        /// <param name="dicPort"></param>
-        /// <returns></returns>
-        private Dictionary<string, FirewallRule> LoadExists( SshClient ssh)
-        {
-            Dictionary<int, bool> dicPort = LoadRulePort();
-            SshCommand cmd = ssh.RunCommand("firewall-cmd --list-rich-rules");//查看当前规则
-            string res = cmd.Result;
-            StringReader reader = new StringReader(res);
-            Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
-            string line = null;
-            string sport = null;
-            string ip = null;
-            string protocol = null;
-            int port = 0;
-            while ((line = reader.ReadLine()) != null)
-            {
-                ip = SubValue("source address=", line);
-                sport= SubValue("port port=", line);
-                protocol = SubValue("protocol=", line);
-
-                if (string.IsNullOrWhiteSpace(ip) || string.IsNullOrWhiteSpace(sport)) 
-                {
-                    continue;
-                }
-                port = sport.ConvertTo<int>();
-                if (!dicPort.ContainsKey(port)) //跳过非接管的端口
-                {
-                    continue;
-                }
-                string key = GetKey(ip, port,protocol);
-                dicExists[key] = new FirewallRule(ip, port,protocol);
-            }
-            return dicExists;
-        }
-        /// <summary>
-        /// 获取键
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="sport"></param>
-        /// <returns></returns>
-        private string GetKey(string ip, int port,string protocol) 
-        {
-            StringBuilder sbRet = new StringBuilder();
-            sbRet.Append(ip);
-            sbRet.Append("_");
-            sbRet.Append(port.ToString());
-            sbRet.Append("_");
-            sbRet.Append(protocol);
-            return sbRet.ToString();
-        }
-
-
-        /// <summary>
-        /// 截取内容
-        /// </summary>
-        /// <param name="tag">标记</param>
-        /// <param name="line">内容</param>
-        /// <returns></returns>
-        private string SubValue(string tag,string line) 
-        {
-            int startindex = line.IndexOf(tag, StringComparison.CurrentCultureIgnoreCase);
-            if (startindex < 0) 
-            {
-                return null;
-            }
-            startindex = line.IndexOf("\"", startindex + 1,StringComparison.CurrentCultureIgnoreCase)+1;
-            if (startindex < 0)
-            {
-                return null;
-            }
-
-            int endindex= line.IndexOf("\"", startindex + 1, StringComparison.CurrentCultureIgnoreCase);
-            if (endindex < 0)
-            {
-                return null;
-            }
-            return line.Substring(startindex, endindex - startindex);
-        }
+       
     }
 }

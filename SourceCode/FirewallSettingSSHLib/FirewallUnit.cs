@@ -145,37 +145,6 @@ namespace SettingLib
                 return _protocol;
             }
         }
-        /// <summary>
-        /// 创建新增命令
-        /// </summary>
-        /// <returns></returns>
-        public string CreateAddCommand() 
-        {
-            StringBuilder sbCmd = new StringBuilder();
-            sbCmd.Append("firewall-cmd --permanent --add-rich-rule=\"rule family=\"ipv4\" source address=\"");
-            sbCmd.Append(_ip);
-            sbCmd.Append("\" port protocol=\"");
-            sbCmd.Append(_protocol);
-            sbCmd.Append("\" port=\"");
-            sbCmd.Append(_port.ToString());
-            sbCmd.Append("\" accept\"");
-            return sbCmd.ToString();
-        }
-        /// <summary>
-        /// 创建新增命令
-        /// </summary>
-        /// <returns></returns>
-        public string CreateDeleteCommand()
-        {
-            StringBuilder sbCmd = new StringBuilder();
-            sbCmd.Append("firewall-cmd --permanent --remove-rich-rule=\"rule family=\"ipv4\" source address=\"");
-            sbCmd.Append(_ip);
-            sbCmd.Append("\" port protocol=\"");
-            sbCmd.Append(_protocol);
-            sbCmd.Append("\" port=\""); ;
-            sbCmd.Append(_port.ToString());
-            sbCmd.Append("\" accept\"");
-            return sbCmd.ToString();
-        }
+        
     }
 }
