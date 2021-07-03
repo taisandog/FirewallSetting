@@ -124,7 +124,7 @@ namespace SettingLib
         {
             List<string> lstIP = LoadUserIP();
 
-            Dictionary<int, bool> dicPort = LoadRulePort();
+            
 
            
 
@@ -133,8 +133,8 @@ namespace SettingLib
             {
                 ssh.Connect();
                 //对别哪些需要执行
-                Dictionary<string, FirewallRule> dicExistsRule = LoadExists(dicPort, ssh);
-                List<string> cmd = CreateCMD(lstIP, dicPort, dicExistsRule);
+                Dictionary<string, FirewallRule> dicExistsRule = LoadExists( ssh);
+                List<string> cmd = CreateCMD(lstIP, dicExistsRule);
                 foreach (string command in cmd)
                 {
                     SshCommand res = ssh.RunCommand(command);
@@ -150,21 +150,22 @@ namespace SettingLib
         /// 创建指令
         /// </summary>
         /// <returns></returns>
-        private List<string> CreateCMD(List<string> lstIP, Dictionary<int, bool> dicPort, Dictionary<string, FirewallRule> dicExistsRule)
+        private List<string> CreateCMD(List<string> lstIP,  Dictionary<string, FirewallRule> dicExistsRule)
         {
+            
             List<FirewallRule> lstCreateItem = new List<FirewallRule>();//需要创建的列表
             foreach (string ip in lstIP)
             {
-                foreach (KeyValuePair<int, bool> kvpPort in dicPort)
+                foreach (FirewallItem fwItem in _firewallRule)
                 {
-                    int port = kvpPort.Key;
-                    string key = GetKey(ip, port);
+                    //int port = kvpPort.Key;
+                    string key = GetKey(ip, fwItem.Port, fwItem.Protocol);
                     if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
                     {
                         dicExistsRule.Remove(key);
                         continue;
                     }
-                    lstCreateItem.Add(new FirewallRule(ip, port));
+                    lstCreateItem.Add(new FirewallRule(ip, fwItem.Port, fwItem.Protocol));
                 }
             }
 
@@ -188,13 +189,13 @@ namespace SettingLib
         /// 加载规则端口
         /// </summary>
         /// <returns></returns>
-        private Dictionary<int, bool> LoadRulePort() 
+        private Dictionary<int, bool> LoadRulePort()
         {
             //加载接管的端口
             Dictionary<int, bool> dicPort = new Dictionary<int, bool>();
             foreach (FirewallItem item in _firewallRule)
             {
-                dicPort[item.port] = true;
+                dicPort[item.Port] = true;
             }
             return dicPort;
         }
@@ -238,8 +239,9 @@ namespace SettingLib
         /// </summary>
         /// <param name="dicPort"></param>
         /// <returns></returns>
-        private Dictionary<string, FirewallRule> LoadExists(Dictionary<int, bool> dicPort, SshClient ssh)
+        private Dictionary<string, FirewallRule> LoadExists( SshClient ssh)
         {
+            Dictionary<int, bool> dicPort = LoadRulePort();
             SshCommand cmd = ssh.RunCommand("firewall-cmd --list-rich-rules");//查看当前规则
             string res = cmd.Result;
             StringReader reader = new StringReader(res);
@@ -247,12 +249,13 @@ namespace SettingLib
             string line = null;
             string sport = null;
             string ip = null;
+            string protocol = null;
             int port = 0;
             while ((line = reader.ReadLine()) != null)
             {
                 ip = SubValue("source address=", line);
                 sport= SubValue("port port=", line);
-                
+                protocol = SubValue("protocol=", line);
 
                 if (string.IsNullOrWhiteSpace(ip) || string.IsNullOrWhiteSpace(sport)) 
                 {
@@ -263,8 +266,8 @@ namespace SettingLib
                 {
                     continue;
                 }
-                string key = GetKey(ip, port);
-                dicExists[key] = new FirewallRule(ip, port);
+                string key = GetKey(ip, port,protocol);
+                dicExists[key] = new FirewallRule(ip, port,protocol);
             }
             return dicExists;
         }
@@ -274,9 +277,15 @@ namespace SettingLib
         /// <param name="ip"></param>
         /// <param name="sport"></param>
         /// <returns></returns>
-        private string GetKey(string ip, int port) 
+        private string GetKey(string ip, int port,string protocol) 
         {
-            return ip + "_" + port.ToString();
+            StringBuilder sbRet = new StringBuilder();
+            sbRet.Append(ip);
+            sbRet.Append("_");
+            sbRet.Append(port.ToString());
+            sbRet.Append("_");
+            sbRet.Append(protocol);
+            return sbRet.ToString();
         }
 
 

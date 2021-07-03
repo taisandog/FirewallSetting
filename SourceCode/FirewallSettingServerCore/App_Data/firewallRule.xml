@@ -1,7 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-<rule name="supervisor查看" ruleName="supervisor" rulePath=""
-      remotePorts="" localPorts="9001" direction="IN"/>
-	<rule name="Web" ruleName="supervisor" rulePath=""
-		  remotePorts="" localPorts="80" direction="IN"/>
+<rule name="supervisor查看" port="9001" protocol="tcp,udp" />
+<rule name="Web" port="80" protocol="tcp"/>
 </root>

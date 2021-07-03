@@ -291,22 +291,39 @@ namespace FirewallSettingServerCore
             List<FirewallItem> lstRet = new List<FirewallItem>();
             string name = null;
             string ruleName = null;
-            string remotePorts = null;
+            string port = null;
+            string protocol = null;
+            string[] arrProtocol = null;
             foreach (XmlNode node in lstRule)
             {
                 XmlAttribute att = node.Attributes["name"];
                 name = att.InnerText;
 
-                att = node.Attributes["ruleName"];
-                ruleName = att.InnerText;
 
-                att = node.Attributes["localPorts"];
-                remotePorts = att.InnerText;
+                att = node.Attributes["port"];
+                port = att.InnerText;
 
-                FirewallItem item = new FirewallItem();
-                item.Name = name;
-                item.port = remotePorts.ConvertTo<int>();
-                lstRet.Add(item);
+                att = node.Attributes["protocol"];
+                protocol = att.InnerText;
+                if (string.IsNullOrWhiteSpace(protocol)) 
+                {
+                    protocol = "tcp";
+                }
+                arrProtocol = protocol.Split(',');
+
+                foreach(string sProtocol in arrProtocol) 
+                {
+                    if (string.IsNullOrWhiteSpace(sProtocol)) 
+                    {
+                        continue;
+                    }
+                    FirewallItem item = new FirewallItem();
+                    item.Name = name;
+                    item.Port = port.ConvertTo<int>();
+                    item.Protocol = sProtocol;
+                    lstRet.Add(item);
+                }
+                
             }
 
 

@@ -36,42 +36,44 @@ namespace SettingLib
             return lst.ToArray();
         }
 
+        private static string UserName = System.Configuration.ConfigurationManager.AppSettings["SSH.UserName"];
+        private static string UserPassword = System.Configuration.ConfigurationManager.AppSettings["SSH.UserPassword"];
+        private static string PrivateKey = System.Configuration.ConfigurationManager.AppSettings["SSH.PrivateKey"];
+        private static string Host = System.Configuration.ConfigurationManager.AppSettings["SSH.Host"];
+        private static string Sport = System.Configuration.ConfigurationManager.AppSettings["SSH.Port"];
+
         /// <summary>
         /// 创建SSH连接
         /// </summary>
         /// <returns></returns>
         public static SshClient CreateSsh() 
         {
-            string username= System.Configuration.ConfigurationManager.AppSettings["SSH.UserName"];
-            string userpassword = System.Configuration.ConfigurationManager.AppSettings["SSH.UserPassword"];
-            string privateKey = System.Configuration.ConfigurationManager.AppSettings["SSH.PrivateKey"];
-            string host = System.Configuration.ConfigurationManager.AppSettings["SSH.Host"];
-            string sport = System.Configuration.ConfigurationManager.AppSettings["SSH.Port"];
+            
 
             int port = 22;
-            if (!string.IsNullOrWhiteSpace(sport)) 
+            if (!string.IsNullOrWhiteSpace(Sport)) 
             {
-                port = sport.ConvertTo<int>();
+                port = Sport.ConvertTo<int>();
             }
 
             
             SshClient client = null;
 
-            if (!string.IsNullOrWhiteSpace(privateKey))
+            if (!string.IsNullOrWhiteSpace(PrivateKey))
             {
                 List<AuthenticationMethod> methods = new List<AuthenticationMethod>();
-                if (!string.IsNullOrWhiteSpace(privateKey))
+                if (!string.IsNullOrWhiteSpace(PrivateKey))
                 {
-                    PrivateKeyFile keyFile = new PrivateKeyFile(privateKey);
-                    methods.Add(new PrivateKeyAuthenticationMethod(username, keyFile));
+                    PrivateKeyFile keyFile = new PrivateKeyFile(PrivateKey);
+                    methods.Add(new PrivateKeyAuthenticationMethod(UserName, keyFile));
 
-                    ConnectionInfo con = new ConnectionInfo(host, port, username, methods.ToArray());
+                    ConnectionInfo con = new ConnectionInfo(Host, port, UserName, methods.ToArray());
                     client = new SshClient(con);
                 }
             }
             else 
             {
-                client = new SshClient(host,port, username, userpassword);
+                client = new SshClient(Host,port, UserName, UserPassword);
             }
             return client;
         }
@@ -99,10 +101,11 @@ namespace SettingLib
     public class FirewallRule 
     {
 
-        public FirewallRule(string ip,int port) 
+        public FirewallRule(string ip,int port,string protocol) 
         {
             _port = port;
             _ip = ip;
+            _protocol = protocol;
         }
 
         /// <summary>
@@ -131,7 +134,17 @@ namespace SettingLib
                 return _ip;
             }
         }
-
+        private string _protocol;
+        /// <summary>
+        /// 协议
+        /// </summary>
+        public string Protocol
+        {
+            get
+            {
+                return _protocol;
+            }
+        }
         /// <summary>
         /// 创建新增命令
         /// </summary>
@@ -141,7 +154,9 @@ namespace SettingLib
             StringBuilder sbCmd = new StringBuilder();
             sbCmd.Append("firewall-cmd --permanent --add-rich-rule=\"rule family=\"ipv4\" source address=\"");
             sbCmd.Append(_ip);
-            sbCmd.Append("\" port protocol=\"tcp\" port=\"");
+            sbCmd.Append("\" port protocol=\"");
+            sbCmd.Append(_protocol);
+            sbCmd.Append("\" port=\"");
             sbCmd.Append(_port.ToString());
             sbCmd.Append("\" accept\"");
             return sbCmd.ToString();
@@ -155,7 +170,9 @@ namespace SettingLib
             StringBuilder sbCmd = new StringBuilder();
             sbCmd.Append("firewall-cmd --permanent --remove-rich-rule=\"rule family=\"ipv4\" source address=\"");
             sbCmd.Append(_ip);
-            sbCmd.Append("\" port protocol=\"tcp\" port=\"");
+            sbCmd.Append("\" port protocol=\"");
+            sbCmd.Append(_protocol);
+            sbCmd.Append("\" port=\""); ;
             sbCmd.Append(_port.ToString());
             sbCmd.Append("\" accept\"");
             return sbCmd.ToString();

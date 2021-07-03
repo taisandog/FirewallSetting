@@ -16,7 +16,7 @@ namespace SettingLib
         /// <summary>
         /// 端口
         /// </summary>
-        public int port 
+        public int Port 
         {
             get
             {
@@ -43,5 +43,22 @@ namespace SettingLib
                 _name = value;
             }
         }
+
+        private string _protocol;
+        /// <summary>
+        /// 协议
+        /// </summary>
+        public string Protocol
+        {
+            get
+            {
+                return _protocol;
+            }
+            set
+            {
+                _protocol = value;
+            }
+        }
+
     }
 }
