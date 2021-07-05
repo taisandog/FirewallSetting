@@ -1,5 +1,6 @@
 ﻿using Buffalo.ArgCommon;
 using Buffalo.Kernel;
+using FirewallSettingSSHLib;
 using FirewallSettingSSHLib.FWAdapter;
 using Library;
 using Renci.SshNet;
@@ -53,6 +54,7 @@ namespace FirewallSettingServerCore
                 return;
             }
             Console.WriteLine("FirewallType:"+ _userMan.FWHandle.Name);
+            Console.WriteLine("Log:" + ApplicationLog.BaseRoot);  
             FWUser.IsServer = true;
             try
             {
@@ -115,7 +117,7 @@ namespace FirewallSettingServerCore
                         }
                     }catch(Exception ex) 
                     {
-                        Console.WriteLine(ex.Message);
+                        ApplicationLog.LogException("FirewallSetting", ex);
                     }
                 }
             }
@@ -238,8 +240,7 @@ namespace FirewallSettingServerCore
             if (string.IsNullOrWhiteSpace(conUrl))
             {
 
-                Console.WriteLine("Server.Listen不能为空");
-
+                ApplicationLog.LogError("Server.Listen不能为空");
                 return false;
             }
             string[] urls = conUrl.Split(';');
@@ -273,16 +274,15 @@ namespace FirewallSettingServerCore
                 catch (Exception ex)
                 {
                     
-                        Console.WriteLine(ex.ToString());
-                    
+                        //Console.WriteLine(ex.ToString());
+                    ApplicationLog.LogException("FirewallSetting", ex);
                 }
             }
         }
 
         static void _authServices_OnException(Exception ex)
         {
-            
-                Console.WriteLine(ex.ToString());
+            ApplicationLog.LogException("FirewallSetting", ex);
             
         }
 
@@ -298,7 +298,7 @@ namespace FirewallSettingServerCore
             XmlNodeList lstRule = doc.GetElementsByTagName("rule");
             List<FirewallItem> lstRet = new List<FirewallItem>();
             string name = null;
-            string ruleName = null;
+            //string ruleName = null;
             string port = null;
             string protocol = null;
             string[] arrProtocol = null;
@@ -340,17 +340,20 @@ namespace FirewallSettingServerCore
 
         public void Log(string message)
         {
-            Console.WriteLine(message);
+            //Console.WriteLine(message);
+            ApplicationLog.LogMessage(message);
         }
 
         public void LogError(string message)
         {
-            Console.WriteLine(message);
+            //Console.WriteLine(message);
+            ApplicationLog.LogError(message);
         }
 
         public void LogWarning(string message)
         {
-            Console.WriteLine(message);
+            //Console.WriteLine(message);
+            ApplicationLog.LogWarning(message);
         }
 
         public bool OnUserUpdate()

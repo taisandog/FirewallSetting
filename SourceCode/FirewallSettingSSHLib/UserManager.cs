@@ -58,7 +58,7 @@ namespace SettingLib
             using (SshClient ssh = FirewallUnit.CreateSsh())
             {
                 ssh.Connect();
-                FirewalldAdapter fwAdp = new FirewalldAdapter();
+                FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
                 if (fwAdp.CheckEnable(ssh)) 
                 {
                     return fwAdp;
@@ -121,17 +121,8 @@ namespace SettingLib
             {
                 ssh.Connect();
                 //对别哪些需要执行
-                
-                List<string> cmd =_fwHandle.CreateCommand(ssh);
-                foreach (string command in cmd)
-                {
-                    SshCommand res = ssh.RunCommand(command);
-                    if (!string.IsNullOrWhiteSpace(res.Error))
-                    {
-                        Console.WriteLine(res.Error);
-                    }
-                }
-                _fwHandle.ReLoad(ssh);
+
+                _fwHandle.UpdateFirewall(ssh);
             }
         }
        

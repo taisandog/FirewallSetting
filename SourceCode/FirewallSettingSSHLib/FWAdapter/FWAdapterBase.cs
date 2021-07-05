@@ -1,4 +1,5 @@
-﻿using Renci.SshNet;
+﻿using Buffalo.Kernel;
+using Renci.SshNet;
 using SettingLib;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,35 @@ namespace FirewallSettingSSHLib.FWAdapter
     public abstract class FWAdapterBase
     {
 
+        private string _ipsetName=AppSetting.Default["App.IPSet"]==null? "buffirewallipset" : AppSetting.Default["App.IPSet"];
+        /// <summary>
+        /// 防火墙ip集名
+        /// </summary>
+        public string IPSetName
+        {
+            get
+            {
+                return _ipsetName;
+            }
+            
+        }
+
+        private string _ipsetNameV6;
+        /// <summary>
+        /// 防火墙ip集名
+        /// </summary>
+        public string IPSetNameV6
+        {
+            get
+            {
+                if (_ipsetNameV6 == null) 
+                {
+                    _ipsetNameV6 = _ipsetName + ".v6";
+                }
+                return _ipsetNameV6;
+            }
+
+        }
 
         protected List<FirewallItem> _firewallRule;
         /// <summary>
@@ -57,16 +87,11 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public abstract bool CheckEnable(SshClient ssh);
         /// <summary>
-        /// 生成要执行的指令
+        /// 更新防火墙
         /// </summary>
         /// <param name="ssh"></param>
         /// <returns></returns>
-        public abstract List<string> CreateCommand(SshClient ssh);
-        /// <summary>
-        /// 重新加载防火墙
-        /// </summary>
-        /// <param name="ssh"></param>
-        public abstract void ReLoad(SshClient ssh);
+        public abstract void UpdateFirewall(SshClient ssh);
         /// <summary>
         /// 加载规则端口
         /// </summary>
@@ -133,6 +158,15 @@ namespace FirewallSettingSSHLib.FWAdapter
             return sbRet.ToString();
         }
 
+        /// <summary>
+        /// 判断地址是否ipv6
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        protected bool IsIPV6(string ip) 
+        {
+            return ip.Contains(":");
+        }
 
         /// <summary>
         /// 截取内容

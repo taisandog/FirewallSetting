@@ -76,13 +76,28 @@ namespace FirewallSettingSSHLib.FWAdapter
             }
             return dicExists;
         }
-
+        /// <summary>
+        /// 更新防火墙
+        /// </summary>
+        /// <param name="ssh"></param>
+        public override void UpdateFirewall(SshClient ssh) 
+        {
+            List<string> cmd = CreateCommand(ssh);
+            SshCommand res = null;
+            foreach (string command in cmd)
+            {
+                res = ssh.RunCommand(command);
+                ApplicationLog.LogCmdError(res);
+            }
+            res = ssh.RunCommand("firewall-cmd --reload");
+            ApplicationLog.LogCmdError(res);
+        }
         /// <summary>
         /// 创建要执行的指令
         /// </summary>
         /// <param name="lstIP"></param>
         /// <param name="dicExistsRule"></param>
-        public override List<string> CreateCommand(SshClient ssh)
+        private List<string> CreateCommand(SshClient ssh)
         {
             Dictionary<string, FirewallRule> dicExistsRule = LoadExists(ssh);
             List<string> lstIP = LoadUserIP();
@@ -120,10 +135,14 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// 创建新增命令
         /// </summary>
         /// <returns></returns>
-        public string CreateAddCommand(FirewallRule rule)
+        private string CreateAddCommand(FirewallRule rule)
         {
             StringBuilder sbCmd = new StringBuilder();
-            sbCmd.Append("firewall-cmd --permanent --add-rich-rule=\"rule family=\"ipv4\" source address=\"");
+            string ipType = IsIPV6(rule.IP) ? "ipv6" : "ipv4";
+            sbCmd.Append("firewall-cmd --permanent --add-rich-rule=\"rule family=\"");
+            sbCmd.Append(ipType);
+            sbCmd.Append("\" source address=\"");
+
             sbCmd.Append(rule.IP);
             sbCmd.Append("\" port protocol=\"");
             sbCmd.Append(rule.Protocol);
@@ -136,10 +155,15 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// 创建新增命令
         /// </summary>
         /// <returns></returns>
-        public string CreateDeleteCommand(FirewallRule rule)
+        private string CreateDeleteCommand(FirewallRule rule)
         {
             StringBuilder sbCmd = new StringBuilder();
-            sbCmd.Append("firewall-cmd --permanent --remove-rich-rule=\"rule family=\"ipv4\" source address=\"");
+            string ipType = IsIPV6(rule.IP) ? "ipv6" : "ipv4";
+            //sbCmd.Append("firewall-cmd --permanent --remove-rich-rule=\"rule family=\"ipv4\" source address=\"");
+            sbCmd.Append("firewall-cmd --permanent --remove-rich-rule=\"rule family=\"");
+            sbCmd.Append(ipType);
+            sbCmd.Append("\" source address=\"");
+
             sbCmd.Append(rule.IP);
             sbCmd.Append("\" port protocol=\"");
             sbCmd.Append(rule.Protocol);
@@ -148,13 +172,6 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("\" accept\"");
             return sbCmd.ToString();
         }
-        /// <summary>
-        /// 重新加载防火墙
-        /// </summary>
-        /// <param name="ssh"></param>
-        public override void ReLoad(SshClient ssh)
-        {
-            ssh.RunCommand("firewall-cmd --reload");
-        }
+        
     }
 }
