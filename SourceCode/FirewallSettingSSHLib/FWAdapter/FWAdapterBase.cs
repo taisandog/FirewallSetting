@@ -113,13 +113,30 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public virtual List<string> LoadUserIP()
         {
-            string lanIP = System.Configuration.ConfigurationManager.AppSettings["Server.AllowIP"];
+            string lanIPs = AppSetting.Default["Server.AllowIP"];
             Dictionary<string, bool> dicExists = new Dictionary<string, bool>();
             List<string> lstIP = new List<string>(_allUser.Count);
             List<string> cur = null;
-            if (!string.IsNullOrWhiteSpace(lanIP))
+            string curIP = null;
+            if (!string.IsNullOrWhiteSpace(lanIPs))
             {
-                lstIP.Add(lanIP);
+                string[] lanIPArr = lanIPs.Split(',');
+                foreach (string lanIP in lanIPArr)
+                {
+                    if (string.IsNullOrWhiteSpace(lanIP))
+                    {
+                        continue;
+                    }
+                    curIP = lanIP.Trim();
+                    if (dicExists.ContainsKey(curIP))
+                    {
+                        continue;
+                    }
+
+                    
+                    lstIP.Add(curIP);
+                    dicExists[curIP] = true;
+                }
             }
             foreach (FWUser user in _allUser)
             {
@@ -130,12 +147,13 @@ namespace FirewallSettingSSHLib.FWAdapter
                     {
                         continue;
                     }
-                    if (dicExists.ContainsKey(ip))
+                    curIP = ip.Trim();
+                    if (dicExists.ContainsKey(curIP))
                     {
                         continue;
                     }
-                    lstIP.Add(ip);
-                    dicExists[ip] = true;
+                    lstIP.Add(curIP);
+                    dicExists[curIP] = true;
                 }
             }
             return lstIP;

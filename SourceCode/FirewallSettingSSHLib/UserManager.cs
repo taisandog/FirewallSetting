@@ -63,6 +63,12 @@ namespace SettingLib
                 {
                     return fwAdp;
                 }
+
+                IPtableIPSetAdapter iptAdp = new IPtableIPSetAdapter();
+                if (iptAdp.CheckEnable(ssh))
+                {
+                    return iptAdp;
+                }
             }
 
             return null;

@@ -108,6 +108,22 @@ namespace SettingLib
             _protocol = protocol;
         }
 
+        private int _lineNum;
+        /// <summary>
+        /// 行数，iptables专用
+        /// </summary>
+        public int LineNum
+        {
+            get
+            {
+                return _lineNum;
+            }
+            set 
+            {
+                _lineNum = value;
+            }
+        }
+
         /// <summary>
         /// 端口
         /// </summary>

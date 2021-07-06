@@ -30,6 +30,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         {
             SshCommand cmd = ssh.RunCommand("firewall-cmd --state");//查看当前规则
             string res = cmd.Result;
+
             if (!string.IsNullOrWhiteSpace(res)) 
             {
                 res = res.Trim(' ', '\r', '\n');
