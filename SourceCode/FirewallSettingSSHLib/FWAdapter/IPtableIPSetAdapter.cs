@@ -506,8 +506,15 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 sbCmd.Append("iptables");
             }
-            sbCmd.Append(" -D INPUT ");
-            sbCmd.Append(rule.LineNum.ToString());
+            //sbCmd.Append(" -D INPUT ");
+            //sbCmd.Append(rule.LineNum.ToString());
+            sbCmd.Append(" -D INPUT -m set ! --match-set \"");
+            sbCmd.Append(ipSet);
+            sbCmd.Append("\" src -p ");
+            sbCmd.Append(rule.Protocol.ToString());
+            sbCmd.Append(" --destination-port \"");
+            sbCmd.Append(rule.Port.ToString());
+            sbCmd.Append("\" -j REJECT");
             return sbCmd.ToString();
         }
 
