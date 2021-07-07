@@ -2,5 +2,5 @@
 <root>
 	<rule name="supervisor查看" port="9001" protocol="tcp,udp"/>
 	<rule name="MySQL" port="33169" protocol="tcp,udp"/>
-	<rule name="2" port="88" protocol="tcp,udp"/>
+	<rule name="2" port="81" protocol="tcp,udp"/>
 </root>
