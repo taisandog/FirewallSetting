@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-<rule name="测试端口" port="9980" protocol="tcp,udp" />
-<rule name="测试端口2" port="7890" protocol="tcp"/>
+	<rule name="supervisor查看" port="9001" protocol="tcp,udp"/>
+	<rule name="MySQL" port="33169" protocol="tcp,udp"/>
+	<rule name="2" port="88" protocol="tcp,udp"/>
 </root>

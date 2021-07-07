@@ -50,69 +50,70 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 CheckIPSet(ssh, IPSetName, false);
                 CheckIPSet(ssh, IPSetNameV6, true);
-                ApplicationLog.LogCmdError(cmd);
+                
             }
             return ret;
         }
         /// <summary>
         /// 加载现存规则
         /// </summary>
-        /// <param name="dicPort"></param>
+        /// <param name="ssh">ssh</param>
+        /// <param name="repeatListNumber">重复的规则号</param>
         /// <returns></returns>
-        private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh)
+        private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh, List<FirewallRule> repeatListNumber)
         {
             Dictionary<int, bool> dicPort = LoadRulePort();
             int numHeadIndex = -1;
             int protHeadIndex = -1;
             string ipHead = null;
             string line = null;
-            bool isHead = false;
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
 
 
             SshCommand cmd = ssh.RunCommand("iptables -nvL INPUT --line-number");//查看当前规则
             string res = cmd.Result;
             ipHead = "! match-set " + IPSetName;
-            isHead = true;
+            
             using (StringReader reader = new StringReader(res))
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if(isHead) 
+                    if(numHeadIndex<0) 
                     {
                         numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
                         protHeadIndex= line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
-                        isHead = false;
+                        
                         continue;
                     }
                     if (line.IndexOf(ipHead) <= 0)
                     {
                         continue;
                     }
-                    FillRule(line, IPSetName, numHeadIndex, protHeadIndex, dicExists);
+                    FillRule(line, IPSetName, numHeadIndex, protHeadIndex, dicExists, repeatListNumber);
                 }
             }
 
             cmd = ssh.RunCommand("ip6tables -nvL INPUT --line-number");//查看当前规则
             res = cmd.Result;
             ipHead = "! match-set " + IPSetNameV6;
-            isHead = true;
+            numHeadIndex = -1;
+            protHeadIndex = -1;
             using (StringReader reader = new StringReader(res))
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (isHead)
+                    if (numHeadIndex < 0)
                     {
                         numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
                         protHeadIndex = line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
-                        isHead = false;
+                        
                         continue;
                     }
                     if (line.IndexOf(ipHead) <= 0)
                     {
                         continue;
                     }
-                    FillRule(line, IPSetNameV6, numHeadIndex, protHeadIndex, dicExists);
+                    FillRule(line, IPSetNameV6, numHeadIndex, protHeadIndex, dicExists, repeatListNumber);
                 }
             }
 
@@ -129,7 +130,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="protHeadIndex">prot列的起始索引</param>
         /// <param name="dicExists">当前集合</param>
         private void FillRule(string line,string ipSet, int numHeadIndex, int protHeadIndex,
-            Dictionary<string, FirewallRule> dicExists) 
+            Dictionary<string, FirewallRule> dicExists, List<FirewallRule> repeatListNumber) 
         {
             //string head = "! match-set "+ ipSet;
             
@@ -151,7 +152,14 @@ namespace FirewallSettingSSHLib.FWAdapter
             string key = GetKey(ipSet, port, protocol);
             FirewallRule urle=new FirewallRule(ipSet, port, protocol);
             urle.LineNum = num;
-            dicExists[key] = urle;
+            if (dicExists.ContainsKey(key))
+            {
+                repeatListNumber.Add(urle);
+            }
+            else
+            {
+                dicExists[key] = urle;
+            }
         }
         /// <summary>
         /// 截取端口号
@@ -284,14 +292,106 @@ namespace FirewallSettingSSHLib.FWAdapter
         private List<string> CreateCommand(SshClient ssh)
         {
             List<string> cmd = new List<string>();
-            Dictionary<string, FirewallRule> dicExistsRule = LoadExistsRule(ssh);
+            List<FirewallRule> willDelete = new List<FirewallRule>();
+
+            List<FirewallRule> lstCreateItem = new List<FirewallRule>();//需要创建的列表
+           
+
+            UpdateIPset(ssh, cmd);
+
+            UpdateRule(ssh, willDelete, lstCreateItem);
+
+
+            FirewallRule tmp = null;
+            for (int i=0;i< willDelete.Count-1; i++) 
+            {
+                for(int j = i + 1; j < willDelete.Count; j++) 
+                {
+                    if(willDelete[i].LineNum< willDelete[j].LineNum) 
+                    {
+                        tmp = willDelete[i];
+                        willDelete[i] = willDelete[j];
+                        willDelete[j] = tmp;
+                    }
+                }
+            }
+
+            Dictionary<string, bool> dicExistsLineNum = new Dictionary<string, bool>();//已存在的行数
+            StringBuilder sbKey = null; ;
+            foreach(FirewallRule rule in willDelete) 
+            {
+                sbKey = new StringBuilder();
+                sbKey.Append(rule.LineNum.ToString());
+                sbKey.Append(".");
+                sbKey.Append(IsIPv6(rule.IP)?"v6":"v4");
+                string key = sbKey.ToString();
+                if (dicExistsLineNum.ContainsKey(key)) 
+                {
+                    continue;
+                }
+                dicExistsLineNum[key] = true;
+                cmd.Add(CreateDeleteCommand(rule));
+            }
+
+            foreach(FirewallRule rule in lstCreateItem) 
+            {
+                cmd.Add(CreateAddCommand(rule));
+            }
+
+            return cmd;
+        }
+
+        /// <summary>
+        /// 获取更新规则的指令
+        /// </summary>
+        /// <param name="ssh">ssh</param>
+        /// <param name="willDelete">要删除的规则</param>
+        /// <param name="lstCreateItem">要创建的规则</param>
+        private void UpdateRule(SshClient ssh, List<FirewallRule> willDelete, List<FirewallRule> lstCreateItem)
+        {
+            Dictionary<string, FirewallRule> dicExistsRule = LoadExistsRule(ssh, willDelete);
+
+            foreach (FirewallItem fwItem in _firewallRule)
+            {
+                string key = GetKey(IPSetName, fwItem.Port, fwItem.Protocol);
+                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                {
+                    dicExistsRule.Remove(key);
+
+                }
+                else
+                {
+                    lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
+                }
+
+
+                key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
+                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                {
+                    dicExistsRule.Remove(key);
+                }
+                else
+                {
+                    lstCreateItem.Add(new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol));
+                }
+            }
+            FirewallRule rule = null;
+            foreach (KeyValuePair<string, FirewallRule> kvpRule in dicExistsRule)
+            {
+                rule = kvpRule.Value;
+                willDelete.Add(rule); //删除已经不存在的白名单规则
+            }
+        }
+
+        /// <summary>
+        /// 获取更新ip集合的指令
+        /// </summary>
+        private void UpdateIPset(SshClient ssh,List<string> cmd) 
+        {
             List<string> lstIP = LoadUserIP();
             Dictionary<string, bool> existsIP = new Dictionary<string, bool>();
             FillExistsIP(ssh, IPSetName, existsIP);
             FillExistsIP(ssh, IPSetNameV6, existsIP);
-            List<FirewallRule> lstCreateItem = new List<FirewallRule>();//需要创建的列表
-            FirewallRule rule = null;
-
             //更新IP
             foreach (string ip in lstIP)
             {
@@ -309,45 +409,8 @@ namespace FirewallSettingSSHLib.FWAdapter
                 exIP = kvpExip.Key;
                 cmd.Add(CreateDeleteIPCommand(exIP));//删除集合IP
             }
-            //更新规则
-            foreach (FirewallItem fwItem in _firewallRule)
-            {
-                //int port = kvpPort.Key;
-                string key = GetKey(IPSetName, fwItem.Port, fwItem.Protocol);
-                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
-                {
-                    dicExistsRule.Remove(key);
-
-                }
-                else
-                {
-                    //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
-                    rule = new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol);
-                    cmd.Add(CreateAddCommand(rule));//增加白名单命令
-                }
-
-
-                key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
-                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
-                {
-                    dicExistsRule.Remove(key);
-                }
-                else
-                {
-                    //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
-                    rule = new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol);
-                    cmd.Add(CreateAddCommand(rule));//增加白名单命令
-                }
-
-            }
-
-            foreach (KeyValuePair<string, FirewallRule> kvpRule in dicExistsRule)
-            {
-                rule = kvpRule.Value;
-                cmd.Add(CreateDeleteCommand(rule));//删除白名单命令
-            }
-            return cmd;
         }
+
         /// <summary>
         /// 创建新增IP
         /// </summary>
@@ -393,7 +456,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         private string CreateAddCommand(FirewallRule rule)
         {
             string ipSet = rule.IP;
-            bool isIPv6 = string.Equals(ipSet, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase);
+            bool isIPv6= IsIPv6(ipSet);
             StringBuilder sbCmd = new StringBuilder();
             if (isIPv6)
             {
@@ -413,6 +476,17 @@ namespace FirewallSettingSSHLib.FWAdapter
 
             return sbCmd.ToString();
         }
+
+        /// <summary>
+        /// 判断是否ipv6
+        /// </summary>
+        /// <param name="ipset"></param>
+        /// <returns></returns>
+        private bool IsIPv6(string ipset) 
+        {
+            return string.Equals(ipset, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase);
+        }
+
         /// <summary>
         /// 创建新增命令
         /// </summary>
@@ -420,7 +494,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         private string CreateDeleteCommand(FirewallRule rule)
         {
             string ipSet = rule.IP;
-            bool isIPv6 = string.Equals(ipSet, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase);
+            bool isIPv6 = IsIPv6(ipSet);
             
             StringBuilder sbCmd = new StringBuilder();
 
