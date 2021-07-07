@@ -250,14 +250,7 @@ namespace FirewallSetting
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-            //INetFwRule2 firewallRule = null;
-
-            //firewallRule = firewallPolicy.Rules.Item("Bonjour 服务") as INetFwRule2;
-            QueryCache cache= CacheUnit.CreateCache(BuffaloCacheTypes.Redis, "server=39.108.125.58:6379;throw=1;");
-            string key = "App.BkIP";
-            cache.SetValue<long>(key, 100);
-            object cnt = cache.GetValue(key);
+           
         }
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
