@@ -105,7 +105,7 @@ namespace SettingLib
         private const int BlockTimes = 5;
         private const int PacketTimeout = 30;
         private static readonly string PackIDHead = "pk.";
-
+        private static readonly bool ForceV2 = AppSetting.Default["App.ForceV2"] == "1";
         [WebMethod]
         public APIResault UpdateAddress(string args, HttpListenerRequest request)
         {
@@ -125,6 +125,7 @@ namespace SettingLib
             long tick = arg.GetDataValue<long>("Tick");
             string name = arg.GetDataValue<string>("Name");
             string sign = arg.GetDataValue<string>("Sign");
+            bool isV2 = arg.GetDataValue<string>("V2")=="1";
 
             res = CheckPacket(curTick, name, tick);
             if (!res.IsSuccess)
@@ -139,8 +140,19 @@ namespace SettingLib
             }
 
             string cntkey = KeyCntHead + remoteIP;
-
-            string cursign = user.GetSign(tick);
+            string cursign = null;
+            if (!isV2)
+            {
+                if (ForceV2) 
+                {
+                    return ApiCommon.GetFault("本程序强制用V2验证");
+                }
+                cursign = user.GetSign(tick);
+            }
+            else 
+            {
+                cursign = user.GetSignV2(tick, remoteIP);
+            }
             if (!string.Equals(cursign, sign, StringComparison.CurrentCultureIgnoreCase))
             {
 
@@ -174,13 +186,18 @@ namespace SettingLib
             }
             return ApiCommon.GetSuccess();
         }
-
-        /// <summary>
-        /// 检查是否被屏蔽
-        /// </summary>
-        /// <param name="remoteIP"></param>
-        /// <returns></returns>
-        private APIResault CheckBlockIP(string blockkey,string remoteIP, long curTick) 
+        [WebMethod]
+        public APIResault GetIP(string args, HttpListenerRequest request)
+        {
+            string remoteIP = GetIP(request);
+            return ApiCommon.GetSuccess(null, remoteIP);
+        }
+            /// <summary>
+            /// 检查是否被屏蔽
+            /// </summary>
+            /// <param name="remoteIP"></param>
+            /// <returns></returns>
+            private APIResault CheckBlockIP(string blockkey,string remoteIP, long curTick) 
         {
             
             long bTick = _cache.GetValue<long>(blockkey);

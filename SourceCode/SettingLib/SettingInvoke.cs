@@ -68,6 +68,21 @@ namespace SettingLib
             rh["Tick"] = tick;
             rh["Name"] = name;
             rh["Sign"] = sign;
+            rh["V2"] = "1";
+            APIResault res = rh.DoPost();
+
+            return res;
+        }
+
+        /// <summary>
+        /// 更新地址
+        /// </summary>
+        /// <param name="name">游戏</param>
+        /// <returns></returns>
+        public APIResault GetIP()
+        {
+            RequestHelper rh = GetHelper("GetIP");
+            
             APIResault res = rh.DoPost();
 
             return res;

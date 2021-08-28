@@ -39,6 +39,7 @@ namespace SettingLib
         private static string UserName = System.Configuration.ConfigurationManager.AppSettings["SSH.UserName"];
         private static string UserPassword = System.Configuration.ConfigurationManager.AppSettings["SSH.UserPassword"];
         private static string PrivateKey = System.Configuration.ConfigurationManager.AppSettings["SSH.PrivateKey"];
+        private static string PrivatePassword= System.Configuration.ConfigurationManager.AppSettings["SSH.PrivatePassword"];
         private static string Host = System.Configuration.ConfigurationManager.AppSettings["SSH.Host"];
         private static string Sport = System.Configuration.ConfigurationManager.AppSettings["SSH.Port"];
 
@@ -64,7 +65,15 @@ namespace SettingLib
                 List<AuthenticationMethod> methods = new List<AuthenticationMethod>();
                 if (!string.IsNullOrWhiteSpace(PrivateKey))
                 {
-                    PrivateKeyFile keyFile = new PrivateKeyFile(PrivateKey);
+                    PrivateKeyFile keyFile = null;
+                    if (!string.IsNullOrWhiteSpace(PrivatePassword))
+                    {
+                        keyFile = new PrivateKeyFile(PrivateKey, PrivatePassword);
+                    }
+                    else 
+                    {
+                        keyFile = new PrivateKeyFile(PrivateKey);
+                    }
                     methods.Add(new PrivateKeyAuthenticationMethod(UserName, keyFile));
 
                     ConnectionInfo con = new ConnectionInfo(Host, port, UserName, methods.ToArray());

@@ -105,8 +105,13 @@ namespace SettingLib
             set
             {
                 _secret = value;
+                _arrSecret = null;
             }
         }
+        /// <summary>
+        /// 密钥的分段
+        /// </summary>
+        private string[] _arrSecret;
 
         private bool _multipleIP;
         /// <summary>
@@ -290,9 +295,11 @@ namespace SettingLib
             }
         }
 
-        public static readonly string ServerName = System.Configuration.ConfigurationManager.AppSettings["Server.Name"];
+        public static readonly string ServerName = AppSetting.Default["Server.Name"];
 
-        public static readonly string ServerUrl = System.Configuration.ConfigurationManager.AppSettings["Server.URL"];
+        public static readonly string ServerUrl = AppSetting.Default["Server.URL"];
+
+        public static readonly int ServerKey = AppSetting.Default["Server.ServerKey"].ConvertTo<int>(3);
         /// <summary>
         /// 创建新的密钥
         /// </summary>
@@ -300,12 +307,12 @@ namespace SettingLib
         public static string CreateSecret()
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < ServerKey; i++)
             {
                 Guid id = Guid.NewGuid();
                 byte[] arr = id.ToByteArray();
                 sb.Append(CommonMethods.BytesToHexString(arr, false));
-                sb.Append("-");
+                sb.Append("|");
             }
             sb.Remove(sb.Length - 1, 1);
             return sb.ToString() ;
@@ -329,17 +336,55 @@ namespace SettingLib
             ret = PasswordHash.ToSHA1String(ret,false);
             return ret;
         }
+
         /// <summary>
-        /// 验证签名
+        /// 生成签名
         /// </summary>
-        /// <param name="tick"></param>
-        /// <param name="sign"></param>
+        /// <param name="tick">时间戳</param>
         /// <returns></returns>
-        public bool VerifySign(long tick,string sign)
+        public string GetSignV2(long tick,string ip)
         {
-            string curSign = GetSign(tick);
-            return string.Equals(curSign, sign, StringComparison.CurrentCultureIgnoreCase);
+            if (_arrSecret == null) 
+            {
+                _arrSecret = _secret.Split('|');
+            }
+            StringBuilder sbRet = new StringBuilder();
+            foreach (string secret in _arrSecret)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("name=");
+                sb.Append(System.Web.HttpUtility.UrlEncode(_userName));
+                sb.Append("&secret=");
+                sb.Append(secret);
+                sb.Append("&tick=");
+                sb.Append(tick.ToString());
+                sb.Append("&ip=");
+                sb.Append(ip);
+                string hash = sb.ToString();
+                hash = PasswordHash.ToSHA1String(hash, false);
+                sbRet.Append(hash);
+                sbRet.Append("|");
+            }
+            if (sbRet.Length > 0) 
+            {
+                sbRet.Remove(sbRet.Length-1, 1);
+            }
+            return sbRet.ToString() ;
         }
+
+        
+
+        ///// <summary>
+        ///// 验证签名
+        ///// </summary>
+        ///// <param name="tick"></param>
+        ///// <param name="sign"></param>
+        ///// <returns></returns>
+        //public bool VerifySign(long tick,string sign)
+        //{
+        //    string curSign = GetSign(tick);
+        //    return string.Equals(curSign, sign, StringComparison.CurrentCultureIgnoreCase);
+        //}
 
 
 
@@ -436,7 +481,7 @@ namespace SettingLib
             }
             dic["UserName"] = _userName;
             dic["Secret"] = _secret;
-
+            dic["V2"] = "1";
             return JsonConvert.SerializeObject(dic);
         }
         /// <summary>

@@ -75,10 +75,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                         continue;
                     }
                     port = sport.ConvertTo<int>();
-                    if (!dicPort.ContainsKey(port)) //跳过非接管的端口
-                    {
-                        continue;
-                    }
+                    
                     if (!string.Equals(ipset, IPSetName, StringComparison.CurrentCultureIgnoreCase) &&
                         !string.Equals(ipset, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase)) 
                     {

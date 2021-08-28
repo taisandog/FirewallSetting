@@ -89,6 +89,22 @@ namespace SettingLib
             }
         }
 
+        protected string _v2;
+        /// <summary>
+        /// 是否V2验证
+        /// </summary>
+        public string V2
+        {
+            get
+            {
+                return _v2;
+            }
+            set
+            {
+                _v2 = value;
+            }
+        }
+
         /// <summary>
         /// 密码
         /// </summary>
@@ -107,6 +123,10 @@ namespace SettingLib
                 _secret = value;
             }
         }
+        /// <summary>
+        /// 密码串
+        /// </summary>
+        protected string[] _arrSecret;
 
         private bool _multipleIP;
         /// <summary>
@@ -290,9 +310,11 @@ namespace SettingLib
             }
         }
 
-        public static readonly string ServerName = System.Configuration.ConfigurationManager.AppSettings["Server.Name"];
+        public static readonly string ServerName = AppSetting.Default["Server.Name"];
 
-        public static readonly string ServerUrl = System.Configuration.ConfigurationManager.AppSettings["Server.URL"];
+        public static readonly string ServerUrl = AppSetting.Default["Server.URL"];
+
+        public static readonly int ServerKey = AppSetting.Default["Server.ServerKey"].ConvertTo<int>(3);
         /// <summary>
         /// 创建新的密钥
         /// </summary>
@@ -300,12 +322,12 @@ namespace SettingLib
         public static string CreateSecret()
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < ServerKey; i++)
             {
                 Guid id = Guid.NewGuid();
                 byte[] arr = id.ToByteArray();
                 sb.Append(CommonMethods.BytesToHexString(arr, false));
-                sb.Append("-");
+                sb.Append("|");
             }
             sb.Remove(sb.Length - 1, 1);
             return sb.ToString() ;
@@ -393,6 +415,10 @@ namespace SettingLib
                 att.InnerText = user.Secret;
                 item.Attributes.Append(att);
 
+                att = doc.CreateAttribute("V2");
+                att.InnerText = user.V2;
+                item.Attributes.Append(att);
+
                 att = doc.CreateAttribute("iplist");
                 
                 att.InnerText = JsonConvert.SerializeObject(user.IPList);
@@ -436,7 +462,7 @@ namespace SettingLib
             }
             dic["UserName"] = _userName;
             dic["Secret"] = _secret;
-
+            dic["V2"] = _v2;
             return JsonConvert.SerializeObject(dic);
         }
         /// <summary>
@@ -446,6 +472,40 @@ namespace SettingLib
         public static FWUser LoadJson(string json)
         {
             return JsonConvert.DeserializeObject<FWUser>(json);
+        }
+        /// <summary>
+        /// 生成签名
+        /// </summary>
+        /// <param name="tick">时间戳</param>
+        /// <returns></returns>
+        public string GetSignV2(long tick, string ip)
+        {
+            if (_arrSecret == null)
+            {
+                _arrSecret = _secret.Split('|');
+            }
+            StringBuilder sbRet = new StringBuilder();
+            foreach (string secret in _arrSecret)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("name=");
+                sb.Append(System.Web.HttpUtility.UrlEncode(_userName));
+                sb.Append("&secret=");
+                sb.Append(secret);
+                sb.Append("&tick=");
+                sb.Append(tick.ToString());
+                sb.Append("&ip=");
+                sb.Append(ip);
+                string hash = sb.ToString();
+                hash = PasswordHash.ToSHA1String(hash, false);
+                sbRet.Append(hash);
+                sbRet.Append("|");
+            }
+            if (sbRet.Length > 0)
+            {
+                sbRet.Remove(sbRet.Length-1, 1);
+            }
+            return sbRet.ToString();
         }
         /// <summary>
         /// 加载配置
@@ -500,6 +560,11 @@ namespace SettingLib
                     if (att != null)
                     {
                         user.MultipleIP = att.InnerText=="1";
+                    }
+                    att = node.Attributes["V2"];
+                    if (att != null)
+                    {
+                        user.V2 = att.InnerText ;
                     }
                     lstRet.Add(user);
                 }

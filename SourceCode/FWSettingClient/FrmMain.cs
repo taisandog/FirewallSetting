@@ -97,24 +97,41 @@ namespace FWSettingClient
         /// </summary>
         private void UpdateIP()
         {
-            long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now,true,true);
+            long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now, true, true);
             Queue<FWUser> que = null;
             lock (_curUser)
             {
                 que = new Queue<FWUser>(_curUser);
             }
-                foreach (FWUser user in que)
+            APIResault res = null;
+            string sign = null;
+            foreach (FWUser user in que)
+            {
+                if (user.V2 == "1")
                 {
-                    APIResault res = user.Handle.UpdateAddress(user.UserName, tick, user.GetSign(tick));
+                    res = user.Handle.GetIP();
                     if (!res.IsSuccess)
                     {
                         mess.LogError(user.Name + ":" + res.Message);
                         continue;
                     }
-                    mess.Log(user.Name + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  进行了IP同步");
+                    string ip = res.GetValue<string>();
+                    sign = user.GetSignV2(tick, ip);
                 }
-            
-            
+                else 
+                {
+                    sign = user.GetSign(tick);
+                }
+                res = user.Handle.UpdateAddress(user.UserName, tick, sign);
+                if (!res.IsSuccess)
+                {
+                    mess.LogError(user.Name + ":" + res.Message);
+                    continue;
+                }
+                mess.Log(user.Name + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  进行了IP同步");
+            }
+
+
         }
 
         private void btnOK_Click(object sender, EventArgs e)
