@@ -77,6 +77,23 @@ namespace FirewallSettingSSHLib.FWAdapter
                 _allUser = value;
             }
         }
+        /// <summary>
+        /// 是否使用sudo执行命令
+        /// </summary>
+        private bool _useSudo = AppSetting.Default["App.UseSudo"] =="1";
+        /// <summary>
+        /// 运行命令
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        public SshCommand RunCommand(SshClient ssh,string cmd) 
+        {
+            if (_useSudo) 
+            {
+                return ssh.RunCommand("sudo "+cmd);
+            }
+            return ssh.RunCommand(cmd);
+        }
 
         public abstract string Name { get; }
 
@@ -86,6 +103,12 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="ssh"></param>
         /// <returns></returns>
         public abstract bool CheckEnable(SshClient ssh);
+        /// <summary>
+        /// 初始化Setting
+        /// </summary>
+        /// <param name="ssh"></param>
+        /// <returns></returns>
+        public abstract bool InitSetting(SshClient ssh);
         /// <summary>
         /// 更新防火墙
         /// </summary>

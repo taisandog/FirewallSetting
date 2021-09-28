@@ -28,13 +28,17 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh) 
         {
-            SshCommand cmd = ssh.RunCommand("firewall-cmd --state");//查看当前规则
+            SshCommand cmd = RunCommand(ssh,"firewall-cmd --state");//查看当前规则
             string res = cmd.Result;
             if (!string.IsNullOrWhiteSpace(res)) 
             {
                 res = res.Trim(' ', '\r', '\n');
             }
             return string.Equals(res, "running", StringComparison.CurrentCultureIgnoreCase);
+        }
+        public override bool InitSetting(SshClient ssh)
+        {
+            return true;
         }
         /// <summary>
         /// 加载现存规则
@@ -44,7 +48,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         private  Dictionary<string, FirewallRule> LoadExists(SshClient ssh)
         {
             Dictionary<int, bool> dicPort = LoadRulePort();
-            SshCommand cmd = ssh.RunCommand("firewall-cmd --list-rich-rules");//查看当前规则
+            SshCommand cmd = RunCommand(ssh,"firewall-cmd --list-rich-rules");//查看当前规则
             string res = cmd.Result;
             
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
@@ -86,10 +90,10 @@ namespace FirewallSettingSSHLib.FWAdapter
             SshCommand res = null;
             foreach (string command in cmd)
             {
-                res = ssh.RunCommand(command);
+                res = RunCommand(ssh,command);
                 ApplicationLog.LogCmdError(res);
             }
-            res = ssh.RunCommand("firewall-cmd --reload");
+            res = RunCommand(ssh,"firewall-cmd --reload");
             ApplicationLog.LogCmdError(res);
         }
         /// <summary>
@@ -172,6 +176,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("\" accept\"");
             return sbCmd.ToString();
         }
+
         
     }
 }

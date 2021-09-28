@@ -25,7 +25,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh)
         {
-            SshCommand cmd = ssh.RunCommand("service iptables status");//查看当前规则
+            SshCommand cmd = RunCommand(ssh ,"service iptables status");//查看当前规则
             string res = cmd.Result;
 
             bool ret = false;
@@ -46,13 +46,14 @@ namespace FirewallSettingSSHLib.FWAdapter
                 }
             }
             
-            if (ret)
-            {
-                CheckIPSet(ssh, IPSetName, false);
-                CheckIPSet(ssh, IPSetNameV6, true);
-                
-            }
+            
             return ret;
+        }
+        public override bool InitSetting(SshClient ssh)
+        {
+            CheckIPSet(ssh, IPSetName, false);
+            CheckIPSet(ssh, IPSetNameV6, true);
+            return true;
         }
         /// <summary>
         /// 加载现存规则
@@ -70,7 +71,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
 
 
-            SshCommand cmd = ssh.RunCommand("iptables -nvL INPUT --line-number");//查看当前规则
+            SshCommand cmd = RunCommand(ssh,"iptables -nvL INPUT --line-number");//查看当前规则
             string res = cmd.Result;
             ipHead = "! match-set " + IPSetName;
             
@@ -93,7 +94,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                 }
             }
 
-            cmd = ssh.RunCommand("ip6tables -nvL INPUT --line-number");//查看当前规则
+            cmd = RunCommand(ssh,"ip6tables -nvL INPUT --line-number");//查看当前规则
             res = cmd.Result;
             ipHead = "! match-set " + IPSetNameV6;
             numHeadIndex = -1;
@@ -235,11 +236,11 @@ namespace FirewallSettingSSHLib.FWAdapter
             List<string> cmd = CreateCommand(ssh);
             foreach (string command in cmd)
             {
-                res = ssh.RunCommand(command);
+                res = RunCommand(ssh,command);
                 ApplicationLog.LogCmdError(res);
             }
-            res = ssh.RunCommand("service iptables save");
-            res = ssh.RunCommand("service ip6tables save");
+            res = RunCommand(ssh,"service iptables save");
+            res = RunCommand(ssh,"service ip6tables save");
             ApplicationLog.LogCmdError(res);
         }
 
@@ -254,7 +255,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             StringBuilder sbCmd = new StringBuilder();
             sbCmd.Append("ipset list ");
             sbCmd.Append(ipsetName);
-            SshCommand cmd = ssh.RunCommand(sbCmd.ToString());
+            SshCommand cmd = RunCommand(ssh, sbCmd.ToString());
             string res = cmd.Result;
             string line = null;
             int state = 0;
@@ -525,7 +526,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("ipset list ");
             sbCmd.Append(setName);
 
-            SshCommand cmd = ssh.RunCommand(sbCmd.ToString());//查看当前规则
+            SshCommand cmd = RunCommand(ssh, sbCmd.ToString());//查看当前规则
             string res = cmd.Result;
             string line = null;
             if (!string.IsNullOrWhiteSpace(res)) //已存在则退出
@@ -559,7 +560,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             }
             sbCmd.Append(" maxelem 1000000");
             
-            cmd = ssh.RunCommand(sbCmd.ToString());//创建IP集
+            cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
             ApplicationLog.LogCmdError(cmd);
 
         }

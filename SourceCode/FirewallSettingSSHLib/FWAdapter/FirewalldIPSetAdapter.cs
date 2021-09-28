@@ -28,7 +28,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh) 
         {
-            SshCommand cmd = ssh.RunCommand("firewall-cmd --state");//查看当前规则
+            SshCommand cmd = RunCommand(ssh,"firewall-cmd --state");//查看当前规则
             string res = cmd.Result;
 
             if (!string.IsNullOrWhiteSpace(res)) 
@@ -36,15 +36,19 @@ namespace FirewallSettingSSHLib.FWAdapter
                 res = res.Trim(' ', '\r', '\n');
             }
             bool ret= string.Equals(res, "running", StringComparison.CurrentCultureIgnoreCase);
-            if (ret)
-            {
-                CheckIPSet(ssh, IPSetName, false);
-                CheckIPSet(ssh, IPSetNameV6, true);
-                cmd = ssh.RunCommand("firewall-cmd --reload");
-                ApplicationLog.LogCmdError(cmd);
-            }
+            
             return ret;
         }
+
+        public override bool InitSetting(SshClient ssh)
+        {
+            CheckIPSet(ssh, IPSetName, false);
+            CheckIPSet(ssh, IPSetNameV6, true);
+            SshCommand cmd = RunCommand(ssh,"firewall-cmd --reload");
+            ApplicationLog.LogCmdError(cmd);
+            return true;
+        }
+
         /// <summary>
         /// 加载现存规则
         /// </summary>
@@ -53,7 +57,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh)
         {
             Dictionary<int, bool> dicPort = LoadRulePort();
-            SshCommand cmd = ssh.RunCommand("firewall-cmd --list-rich-rules");//查看当前规则
+            SshCommand cmd = RunCommand(ssh,"firewall-cmd --list-rich-rules");//查看当前规则
             string res = cmd.Result;
             
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
@@ -97,10 +101,10 @@ namespace FirewallSettingSSHLib.FWAdapter
             List<string> cmd = CreateCommand(ssh);
             foreach (string command in cmd)
             {
-                res = ssh.RunCommand(command);
+                res = RunCommand(ssh,command);
                 ApplicationLog.LogCmdError(res);
             }
-            res = ssh.RunCommand("firewall-cmd --reload");
+            res = RunCommand(ssh,"firewall-cmd --reload");
             ApplicationLog.LogCmdError(res);
         }
 
@@ -116,7 +120,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("firewall-cmd --permanent --ipset=");
             sbCmd.Append(ipsetName);
             sbCmd.Append(" --get-entries");
-            SshCommand cmd = ssh.RunCommand(sbCmd.ToString());
+            SshCommand cmd = RunCommand(ssh,sbCmd.ToString());
             string res = cmd.Result;
             string line=null;
             using (StringReader reader = new StringReader(res))
@@ -296,7 +300,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(setName);
             sbCmd.Append(" --get-entries");
 
-            SshCommand cmd = ssh.RunCommand(sbCmd.ToString());//查看当前规则
+            SshCommand cmd = RunCommand(ssh,sbCmd.ToString());//查看当前规则
             string res = cmd.Error;
             if (string.IsNullOrWhiteSpace(res)) //已存在则退出
             {
@@ -313,7 +317,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 sbCmd.Append(" --option=family=inet6");
             }
-            cmd = ssh.RunCommand(sbCmd.ToString()) ;//创建IP集
+            cmd = RunCommand(ssh,sbCmd.ToString()) ;//创建IP集
             ApplicationLog.LogCmdError(cmd);
 
         }

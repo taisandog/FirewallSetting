@@ -55,22 +55,46 @@ namespace SettingLib
 
         private FWAdapterBase LoadAdapter()
         {
+            string firewallType = AppSetting.Default["Server.FirewallType"];
+
+            if(string.Equals(firewallType, "iptables",StringComparison.CurrentCultureIgnoreCase)) 
+            {
+                return new IPtableIPSetAdapter();
+            }
+            if (string.Equals(firewallType, "firewalld", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return new FirewalldIPSetAdapter();
+            }
             using (SshClient ssh = FirewallUnit.CreateSsh())
             {
                 ssh.Connect();
-                FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
-                if (fwAdp.CheckEnable(ssh)) 
+                return FindFirewalld(ssh);
+            }
+
+        }
+        /// <summary>
+        /// 查找可用的防火墙
+        /// </summary>
+        /// <returns></returns>
+        private FWAdapterBase FindFirewalld(SshClient ssh) 
+        {
+            FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
+            if (fwAdp.CheckEnable(ssh))
+            {
+                if (fwAdp.InitSetting(ssh))
                 {
                     return fwAdp;
                 }
+            }
 
-                IPtableIPSetAdapter iptAdp = new IPtableIPSetAdapter();
-                if (iptAdp.CheckEnable(ssh))
+            IPtableIPSetAdapter iptAdp = new IPtableIPSetAdapter();
+            if (iptAdp.CheckEnable(ssh))
+            {
+                if (iptAdp.InitSetting(ssh))
                 {
                     return iptAdp;
                 }
             }
-
             return null;
         }
 
