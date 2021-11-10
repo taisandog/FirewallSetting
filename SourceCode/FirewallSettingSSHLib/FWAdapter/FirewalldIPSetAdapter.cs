@@ -12,7 +12,7 @@ namespace FirewallSettingSSHLib.FWAdapter
     /// <summary>
     /// firewalld适配器
     /// </summary>
-    public class FirewalldIPSetAdapter : FirewalldAdapter
+    public class FirewalldIPSetAdapter : FWAdapterBase
     {
         public override string Name 
         {
