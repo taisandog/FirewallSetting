@@ -36,13 +36,13 @@ namespace SettingLib
             return lst.ToArray();
         }
 
-        private static string UserName = System.Configuration.ConfigurationManager.AppSettings["SSH.UserName"];
-        private static string UserPassword = System.Configuration.ConfigurationManager.AppSettings["SSH.UserPassword"];
-        private static string PrivateKey = System.Configuration.ConfigurationManager.AppSettings["SSH.PrivateKey"];
-        private static string PrivatePassword= System.Configuration.ConfigurationManager.AppSettings["SSH.PrivatePassword"];
-        private static string Host = System.Configuration.ConfigurationManager.AppSettings["SSH.Host"];
-        private static string Sport = System.Configuration.ConfigurationManager.AppSettings["SSH.Port"];
-
+        public static string UserName = System.Configuration.ConfigurationManager.AppSettings["SSH.UserName"];
+        public static string UserPassword = System.Configuration.ConfigurationManager.AppSettings["SSH.UserPassword"];
+        public static string PrivateKey = System.Configuration.ConfigurationManager.AppSettings["SSH.PrivateKey"];
+        public static string PrivatePassword= System.Configuration.ConfigurationManager.AppSettings["SSH.PrivatePassword"];
+        public static string Host = System.Configuration.ConfigurationManager.AppSettings["SSH.Host"];
+        public static string Sport = System.Configuration.ConfigurationManager.AppSettings["SSH.Port"];
+        public static bool IsDebug = System.Configuration.ConfigurationManager.AppSettings["App.IsDebug"]=="1";
         /// <summary>
         /// 创建SSH连接
         /// </summary>

@@ -25,7 +25,25 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh)
         {
-            SshCommand cmd = RunCommand(ssh ,"service iptables status");//查看当前规则
+            if (CheckIPTablesStatus(ssh)) 
+            {
+                return true;
+            }
+            if (CheckUFWStatus(ssh)) 
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 检查iptables的操作
+        /// </summary>
+        /// <param name="ssh"></param>
+        /// <returns></returns>
+        private bool CheckIPTablesStatus(SshClient ssh) 
+        {
+            SshCommand cmd = RunCommand(ssh, "service iptables status");//查看当前规则
             string res = cmd.Result;
 
             bool ret = false;
@@ -45,23 +63,77 @@ namespace FirewallSettingSSHLib.FWAdapter
                     }
                 }
             }
-            
-            
+
             return ret;
         }
+
+        /// <summary>
+        /// 检查ufw
+        /// </summary>
+        /// <param name="ssh"></param>
+        /// <returns></returns>
+        private bool CheckUFWStatus(SshClient ssh) 
+        {
+            SshCommand cmd = RunCommand(ssh, "ufw status");//查看当前规则
+            string res = cmd.Result;
+
+            if (!string.IsNullOrWhiteSpace(res))
+            {
+                string line = null;
+                using (StringReader sr = new StringReader(res))
+                {
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (line.Contains("inactive"))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+
+            return false;
+            
+        }
+
         public override bool InitSetting(SshClient ssh)
         {
+            CheckIPSetInstall(ssh);
             CheckIPSet(ssh, IPSetName, false);
             CheckIPSet(ssh, IPSetNameV6, true);
             return true;
         }
-        /// <summary>
-        /// 加载现存规则
-        /// </summary>
-        /// <param name="ssh">ssh</param>
-        /// <param name="repeatListNumber">重复的规则号</param>
-        /// <returns></returns>
-        private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh, List<FirewallRule> repeatListNumber)
+
+        private void CheckIPSetInstall(SshClient ssh) 
+        {
+            SshCommand cmd = RunCommand(ssh, "ipset list");//查看当前规则
+            if (cmd.ExitStatus == 0) 
+            {
+                return;
+            }
+            if (cmd.Error.Contains("ipset: command not found",StringComparison.CurrentCultureIgnoreCase)) 
+            {
+                Console.WriteLine("正在安装ipset");
+                cmd= RunCommand(ssh, "apt-get -y install ipset libipset-dev");
+                if (cmd.ExitStatus == 0)
+                {
+                    Console.WriteLine("安装ipset完毕");
+                }
+                else 
+                {
+                    Console.WriteLine(cmd.Error);
+                }
+            }
+        }
+       
+            /// <summary>
+            /// 加载现存规则
+            /// </summary>
+            /// <param name="ssh">ssh</param>
+            /// <param name="repeatListNumber">重复的规则号</param>
+            /// <returns></returns>
+            private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh, List<FirewallRule> repeatListNumber)
         {
             Dictionary<int, bool> dicPort = LoadRulePort();
             int numHeadIndex = -1;

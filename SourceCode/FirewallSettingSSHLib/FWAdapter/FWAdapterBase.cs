@@ -88,11 +88,29 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public SshCommand RunCommand(SshClient ssh,string cmd) 
         {
-            if (_useSudo) 
+            SshCommand ret = null;
+            if (_useSudo)
             {
-                return ssh.RunCommand("sudo "+cmd);
+                StringBuilder sb = new StringBuilder();
+                if (!string.IsNullOrWhiteSpace(FirewallUnit.UserPassword))
+                {
+                    sb.Append("echo -e '");
+                    sb.Append(FirewallUnit.UserPassword);
+                    sb.Append("' | sudo -S ");
+                }
+                else
+                {
+                    sb.Append("sudo ");
+                }
+                sb.Append(cmd);
+                ret = ssh.RunCommand(sb.ToString());
             }
-            return ssh.RunCommand(cmd);
+            else
+            {
+                ret = ssh.RunCommand(cmd);
+            }
+            
+            return ret;
         }
 
         public abstract string Name { get; }

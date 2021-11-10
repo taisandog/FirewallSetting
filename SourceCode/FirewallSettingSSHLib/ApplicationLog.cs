@@ -36,7 +36,7 @@ namespace FirewallSettingSSHLib
         /// <param name="cmd"></param>
         public static void LogCmdError(SshCommand cmd) 
         {
-            if (!string.IsNullOrWhiteSpace(cmd.Error))
+            if (cmd.ExitStatus != 0 && !string.IsNullOrWhiteSpace(cmd.Error))
             {
                 LogError(cmd.Error);
             }
