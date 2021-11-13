@@ -117,6 +117,22 @@ namespace SettingLib
             _protocol = protocol;
         }
 
+        private string _handle;
+        /// <summary>
+        /// 标记为此规则的handle(nftable专用)
+        /// </summary>
+        public string Handle
+        {
+            get
+            {
+                return _handle;
+            }
+            set
+            {
+                _handle = value;
+            }
+        }
+
         private int _lineNum;
         /// <summary>
         /// 行数，iptables专用

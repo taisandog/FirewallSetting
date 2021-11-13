@@ -65,6 +65,10 @@ namespace SettingLib
             {
                 return new FirewalldIPSetAdapter();
             }
+            if (string.Equals(firewallType, "nftable", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return new NFTableAdapter();
+            }
             using (SshClient ssh = FirewallUnit.CreateSsh())
             {
                 ssh.Connect();
@@ -78,6 +82,14 @@ namespace SettingLib
         /// <returns></returns>
         private FWAdapterBase FindFirewalld(SshClient ssh) 
         {
+            NFTableAdapter nftAdp = new NFTableAdapter();
+            if (nftAdp.CheckEnable(ssh))
+            {
+                if (nftAdp.InitSetting(ssh))
+                {
+                    return nftAdp;
+                }
+            }
             FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
             if (fwAdp.CheckEnable(ssh))
             {
@@ -95,6 +107,7 @@ namespace SettingLib
                     return iptAdp;
                 }
             }
+            
             return null;
         }
 

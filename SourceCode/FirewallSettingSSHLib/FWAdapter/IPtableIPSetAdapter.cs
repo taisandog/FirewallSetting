@@ -108,7 +108,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         private void CheckIPSetInstall(SshClient ssh) 
         {
             SshCommand cmd = RunCommand(ssh, "ipset list");//查看当前规则
-            if (cmd.ExitStatus == 0) 
+            if (IsSuccess(cmd)) 
             {
                 return;
             }
@@ -116,7 +116,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 Console.WriteLine("正在安装ipset");
                 cmd= RunCommand(ssh, "apt-get -y install ipset libipset-dev");
-                if (cmd.ExitStatus == 0)
+                if (IsSuccess(cmd))
                 {
                     Console.WriteLine("安装ipset完毕");
                 }

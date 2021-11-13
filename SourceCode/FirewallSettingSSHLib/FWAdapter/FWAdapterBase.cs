@@ -45,6 +45,16 @@ namespace FirewallSettingSSHLib.FWAdapter
 
         }
 
+        /// <summary>
+        /// 判断是否执行成功
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        public static bool IsSuccess(SshCommand cmd) 
+        {
+            return cmd.ExitStatus == 0;
+        }
+        
         protected List<FirewallItem> _firewallRule;
         /// <summary>
         /// 防火墙规则名

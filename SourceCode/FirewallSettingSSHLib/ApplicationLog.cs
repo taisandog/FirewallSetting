@@ -1,4 +1,5 @@
 ﻿using Buffalo.Kernel;
+using FirewallSettingSSHLib.FWAdapter;
 using Renci.SshNet;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace FirewallSettingSSHLib
         /// <param name="cmd"></param>
         public static void LogCmdError(SshCommand cmd) 
         {
-            if (cmd.ExitStatus != 0 && !string.IsNullOrWhiteSpace(cmd.Error))
+            if (!FWAdapterBase.IsSuccess(cmd) && !string.IsNullOrWhiteSpace(cmd.Error))
             {
                 LogError(cmd.Error);
             }

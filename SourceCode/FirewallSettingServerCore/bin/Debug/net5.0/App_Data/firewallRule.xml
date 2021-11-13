@@ -2,7 +2,7 @@
 <root>
 	<rule name="supervisor查看" port="9001" protocol="tcp,udp"/>
 
-	<rule name="Web" port="80" protocol="tcp,udp"/>
+
 
 	<rule name="Web2" port="8808" protocol="tcp,udp"/>
 
