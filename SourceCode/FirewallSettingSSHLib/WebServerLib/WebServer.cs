@@ -1,4 +1,5 @@
 ﻿using Buffalo.ArgCommon;
+using Buffalo.Kernel.TreadPoolManager;
 using Library;
 using System;
 using System.Collections.Generic;
@@ -107,6 +108,8 @@ namespace WebServerLib
             _thd.Start();
             return ApiCommon.GetSuccess();
         }
+        
+
         /// <summary>
         /// URL映射
         /// </summary>
@@ -137,6 +140,7 @@ namespace WebServerLib
                 try
                 {
                     HttpListenerContext httpListenerContext = _server.GetContext();
+                    
                     Thread thd = new Thread(new ParameterizedThreadStart(DoRequest));
                     thd.Start(httpListenerContext);
                 }

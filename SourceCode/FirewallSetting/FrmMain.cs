@@ -1,5 +1,6 @@
 ﻿using Buffalo.DB.CacheManager;
 using Buffalo.DBTools;
+using Buffalo.Kernel.TreadPoolManager;
 using Library;
 using NetFwTypeLib;
 using SettingLib;
@@ -21,6 +22,11 @@ namespace FirewallSetting
 {
     public partial class FrmMain : Form, IShowMessage, IFormUpdate
     {
+        /// <summary>
+        /// 自动刷新线程
+        /// </summary>
+        private static BlockThread _thdRefreash;
+
         private UserManager _userMan;
         private WebServer _server;
         private static readonly string FirewallRule = System.Configuration.ConfigurationManager.AppSettings["Firewall.Rule"];
@@ -200,12 +206,31 @@ namespace FirewallSetting
             {
                 return;
             }
+            _thdRefreash = BlockThread.Create(RefreashHandle);
+            _thdRefreash.StartThread(null);
 
             LogWarning("用户连接监听启动成功");
             Btn_Connect.Enabled = false;
             Btn_Disconnect.Enabled = true;
         }
+        /// <summary>
+        /// 自动刷新线程
+        /// </summary>
+        private void RefreashHandle()
+        {
+            DateTime _lastRefreash = DateTime.MinValue;
 
+            while (_server != null && _server.IsListener)
+            {
+                if (DateTime.Now.Subtract(_lastRefreash).TotalMinutes >= 5)
+                {
+                    _userMan.RefreashFirewall();
+                    _lastRefreash = DateTime.Now;
+                }
+                Thread.Sleep(1000);
+            }
+
+        }
         private void Btn_Disconnect_Click(object sender, EventArgs e)
         {
             Btn_Connect.Enabled = true;
@@ -216,7 +241,7 @@ namespace FirewallSetting
                 try
                 {
                     _server.Stop();
-                    _server = null;
+                    
                     Thread.Sleep(100);
                 }
                 catch (Exception ex)
@@ -227,6 +252,21 @@ namespace FirewallSetting
                     }
                 }
             }
+            if (_thdRefreash != null)
+            {
+
+                try
+                {
+                    _thdRefreash.StopThread();
+                    Thread.Sleep(100);
+                }
+                catch (Exception ex)
+                {
+                    LogError( ex.ToString());
+                }
+            }
+            _server = null;
+            _thdRefreash = null;
         }
 
         private void btnCreateNew_Click(object sender, EventArgs e)

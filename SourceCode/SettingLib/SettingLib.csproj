@@ -76,6 +76,8 @@
     <Compile Include="SettingHandle.cs" />
     <Compile Include="SettingInvoke.cs" />
     <Compile Include="ToolVersionInfo.cs" />
+    <Compile Include="TreadPoolManager\BlockThread.cs" />
+    <Compile Include="TreadPoolManager\BlockThreadPool.cs" />
     <Compile Include="UserManager.cs" />
     <Compile Include="WebServerLib\INetHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

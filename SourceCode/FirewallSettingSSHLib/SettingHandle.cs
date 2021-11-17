@@ -177,8 +177,9 @@ namespace SettingLib
             {
                 return ApiCommon.GetSuccess();
             }
-            _userMan.RefreashFirewall();
             _userMan.SaveConfig();
+            _userMan.RefreashFirewall();
+            
             _form.OnUserUpdate();
             if (_message != null && _message.ShowLog)
             {

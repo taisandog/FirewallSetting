@@ -151,21 +151,27 @@ namespace SettingLib
         /// </summary>
         public void SaveConfig()
         {
-            string path = BasePath + "userInfo.xml";
-            FWUser.SaveConfig(_fwHandle.AllUser);
+            lock (this)
+            {
+                string path = BasePath + "userInfo.xml";
+                FWUser.SaveConfig(_fwHandle.AllUser);
+            }
         }
         /// <summary>
         /// 刷新到防火墙信息
         /// </summary>
         public void RefreashFirewall()
         {
-            List<string> lstIP =_fwHandle.LoadUserIP();
-            using (SshClient ssh = FirewallUnit.CreateSsh())
+            lock (this)
             {
-                ssh.Connect();
-                //对别哪些需要执行
+                List<string> lstIP = _fwHandle.LoadUserIP();
+                using (SshClient ssh = FirewallUnit.CreateSsh())
+                {
+                    ssh.Connect();
+                    //对别哪些需要执行
 
-                _fwHandle.UpdateFirewall(ssh);
+                    _fwHandle.UpdateFirewall(ssh);
+                }
             }
         }
        
