@@ -1,6 +1,7 @@
 ﻿using Buffalo.ArgCommon;
 using Buffalo.DBTools;
 using Buffalo.Kernel;
+using Buffalo.Kernel.TreadPoolManager;
 using SettingLib;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace FWSettingClient
             InitializeComponent();
         }
 
-        private Thread _thd;
+        private BlockThread _thd;
 
         private List<FWUser> _curUser;
         private void FrmMain_Load(object sender, EventArgs e)
@@ -48,29 +49,33 @@ namespace FWSettingClient
         }
         private void StartAuto()
         {
-            _running=true;
-            _thd = new Thread(new ThreadStart(DoAuto));
-            _thd.Start();
+            _running = true;
+            _thd = BlockThread.Create(DoAuto);
+            _thd.StartThread();
         }
         private void StopAuto()
         {
             _running = false;
             try
             {
-                _thd.Abort();
+                _thd.StopThread();
             }
             catch { }
             _thd = null;
-            Thread.Sleep(200);
         }
         private bool _running = false;
 
-        private static readonly int Sleep = 5 * 60 * 1000;
+        private  const int Sleep =  1000;
         private void DoAuto()
         {
+            DateTime lastRun = DateTime.MinValue;
             while (_running)
             {
-                UpdateIP();
+                if (DateTime.Now.Subtract(lastRun).TotalMinutes >= 5)
+                {
+                    UpdateIP();
+                    lastRun = DateTime.Now;
+                }
                 Thread.Sleep(Sleep);
             }
         }

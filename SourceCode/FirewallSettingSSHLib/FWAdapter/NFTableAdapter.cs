@@ -22,15 +22,37 @@ namespace FirewallSettingSSHLib.FWAdapter
                 return "nftable";
             }
         }
+        private const string Firewalld = "firewalld";
         /// <summary>
         /// NFTable名字
         /// </summary>
-        private static readonly string NFTableName = AppSetting.Default["App.NFTableName"] == null ?
-            "fwsettable" : AppSetting.Default["App.NFTableName"];
+        private static readonly string NFTableName =GetNFTableName();
+
+        private static string GetNFTableName()
+        {
+            string name = AppSetting.Default["App.NFTableName"];
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Firewalld;
+            }
+            return name;
+        }
+
+
         /// <summary>
         /// NFTable名字
         /// </summary>
-        private static readonly string NFTableChain= NFTableName+"_chain";
+        private static readonly string NFTableChain= GetNFTableChain();
+
+        private static string GetNFTableChain() 
+        {
+            string chain = AppSetting.Default["App.NFChain"];
+            if (string.IsNullOrWhiteSpace(chain) )
+            {
+                return "filter_IN_public_allow";
+            }
+            return chain;
+        }
 
         /// <summary>
         /// 检查是否运行中
@@ -45,20 +67,23 @@ namespace FirewallSettingSSHLib.FWAdapter
                 return false;
             }
             string res = cmd.Result;
+            if (string.IsNullOrWhiteSpace(res)) 
+            {
+                return true;
+            }
 
-
-            bool ret = res.IndexOf("table ip filter {")>=0;
+            bool ret = res.IndexOf("table")>=0;
             
             return ret;
         }
 
         public override bool InitSetting(SshClient ssh)
         {
-            CheckTable(ssh);
+            //CheckTable(ssh);
             CheckIPSet(ssh, IPSetName,false);
             CheckIPSet(ssh, IPSetNameV6, true);
-            //SshCommand cmd = RunCommand(ssh,"firewall-cmd --reload");
-            //ApplicationLog.LogCmdError(cmd);
+            SshCommand cmd = RunCommand(ssh, "nft list ruleset > /etc/nftables.conf");
+            ApplicationLog.LogCmdError(cmd);
             return true;
         }
 
@@ -101,8 +126,8 @@ namespace FirewallSettingSSHLib.FWAdapter
                         continue;
                     }
                     //截取协议
-                    protocol = line.Substring(0, dportIndex);
-                    protocol = protocol.Trim(' ','\t','\r');
+                    protocol = LoadProtocol(line, dportIndex);
+                    
 
                     //截取端口
                     startIndex = dportIndex + sportTag.Length ;
@@ -126,9 +151,21 @@ namespace FirewallSettingSSHLib.FWAdapter
                     handle = handle.Trim();
 
                     port = sport.ConvertTo<int>();
-                    
-                    
-                    string key = GetKey(IPSetName, port, protocol);
+
+                    //截取ipset
+                    startIndex = line.IndexOf("@");
+                    if (startIndex < 0)
+                    {
+                        continue;
+                    }
+                    endIndex =line.IndexOf(' ', startIndex);
+                    if (endIndex < 0)
+                    {
+                        continue;
+                    }
+                    ipset = line.Substring(startIndex+1, endIndex - startIndex-1);
+
+                    string key = GetKey(ipset, port, protocol);
                     FirewallRule rule = new FirewallRule(ipset, port, protocol);
                     rule.Handle = handle;
                     dicExists[key] = rule;
@@ -136,6 +173,25 @@ namespace FirewallSettingSSHLib.FWAdapter
                 }
             }
             return dicExists;
+        }
+
+        private static string LoadProtocol(string line,int dportIndex) 
+        {
+            Stack<char> stk = new Stack<char>();
+            for(int i = dportIndex - 1; i >= 0; i--) 
+            {
+                if(line[i]==' ' || line[i] == '\t' || line[i] == '\r' || line[i] == '\n') 
+                {
+                    break;
+                }
+                stk.Push(line[i]);
+            }
+            StringBuilder sbRet = new StringBuilder();
+            while (stk.Count > 0) 
+            {
+                sbRet.Append(stk.Pop());
+            }
+            return sbRet.ToString();
         }
         /// <summary>
         /// 更新防火墙
@@ -248,7 +304,6 @@ namespace FirewallSettingSSHLib.FWAdapter
             //更新规则
             foreach (FirewallItem fwItem in _firewallRule)
             {
-                //int port = kvpPort.Key;
                 string key = GetKey(IPSetName, fwItem.Port, fwItem.Protocol);
                 if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
                 {
@@ -259,6 +314,19 @@ namespace FirewallSettingSSHLib.FWAdapter
                 {
                     //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
                     rule = new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol);
+                    cmd.Add(CreateAddCommand(rule));//增加白名单命令
+                }
+
+
+                key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
+                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                {
+                    dicExistsRule.Remove(key);
+                }
+                else
+                {
+                    //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
+                    rule = new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol);
                     cmd.Add(CreateAddCommand(rule));//增加白名单命令
                 }
             }
@@ -320,14 +388,33 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private string CreateAddCommand(FirewallRule rule)
         {
+
+            string ipSet = rule.IP;
+            bool isIPv6 = string.Equals(ipSet, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase);
             
+
             StringBuilder sbCmd = new StringBuilder();
             sbCmd.Append("nft insert rule inet ");
+
+
             sbCmd.Append(NFTableName);
             sbCmd.Append(" ");
             sbCmd.Append(NFTableChain);
+
+            if (isIPv6)
+            {
+                sbCmd.Append(" ip6");
+            }
+            else
+            {
+                sbCmd.Append(" ip");
+
+            }
+            sbCmd.Append(" saddr @");
+            sbCmd.Append(rule.IP);
             sbCmd.Append(" ");
             sbCmd.Append(rule.Protocol);
+            
             sbCmd.Append(" dport ");
             sbCmd.Append(rule.Port);
             
@@ -366,18 +453,28 @@ namespace FirewallSettingSSHLib.FWAdapter
 
             SshCommand cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
             
-            if (IsSuccess(cmd)) //已存在
+            if (!IsSuccess(cmd)) //已存在
             {
-                return;
-            }
-            sbCmd = new StringBuilder();
-            sbCmd.Append("nft add table inet ");
-            sbCmd.Append(NFTableName);
-            cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
-            ApplicationLog.LogCmdError(cmd);
-            if (!IsSuccess(cmd)) 
-            {
+                sbCmd = new StringBuilder();
+                sbCmd.Append("nft add table inet ");
+                sbCmd.Append(NFTableName);
+                cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
                 ApplicationLog.LogCmdError(cmd);
+                if (!IsSuccess(cmd))
+                {
+                    ApplicationLog.LogCmdError(cmd);
+                    return;
+                }
+            }
+
+            sbCmd = new StringBuilder();
+            sbCmd.Append("nft list chain inet ");
+            sbCmd.Append(NFTableName);
+            sbCmd.Append(" ");
+            sbCmd.Append(NFTableChain);
+            cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
+            if (IsSuccess(cmd))
+            {
                 return;
             }
 
@@ -387,7 +484,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(" ");
             sbCmd.Append(NFTableChain);
             //sbCmd.Append(" { type filter hook input priority -10\\; }");
-            sbCmd.Append(" { type filter hook input priority 0 \\; policy accept \\;}");
+            sbCmd.Append(" {type filter hook forward priority 0 \\; policy accept \\; }");
             cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
             ApplicationLog.LogCmdError(cmd);
             if (!IsSuccess(cmd))
@@ -437,24 +534,24 @@ namespace FirewallSettingSSHLib.FWAdapter
                 return;
             }
 
-            sbCmd = new StringBuilder();
+            //sbCmd = new StringBuilder();
 
-            sbCmd.Append("nft add rule inet ");
-            sbCmd.Append(NFTableName);
-            sbCmd.Append(" ");
-            sbCmd.Append(NFTableChain);
-            if (isV6) 
-            {
-                sbCmd.Append(" ip6");
-            }
-            else 
-            {
-                sbCmd.Append(" ip");
-            }
-            sbCmd.Append(" saddr @");
-            sbCmd.Append(setName);
-            sbCmd.Append(" accept");
-            cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
+            //sbCmd.Append("nft add rule inet ");
+            //sbCmd.Append(NFTableName);
+            //sbCmd.Append(" ");
+            //sbCmd.Append(NFTableChain);
+            //if (isV6) 
+            //{
+            //    sbCmd.Append(" ip6");
+            //}
+            //else 
+            //{
+            //    sbCmd.Append(" ip");
+            //}
+            //sbCmd.Append(" saddr @");
+            //sbCmd.Append(setName);
+            //sbCmd.Append(" accept");
+            //cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
 
         }
     }

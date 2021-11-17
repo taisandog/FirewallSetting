@@ -29,6 +29,10 @@ namespace FirewallSettingSSHLib.FWAdapter
         public override bool CheckEnable(SshClient ssh) 
         {
             SshCommand cmd = RunCommand(ssh,"firewall-cmd --state");//查看当前规则
+            if (!IsSuccess(cmd)) 
+            {
+                return false;
+            }
             string res = cmd.Result;
 
             if (!string.IsNullOrWhiteSpace(res)) 

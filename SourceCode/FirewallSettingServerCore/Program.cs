@@ -1,5 +1,6 @@
 ﻿using Buffalo.ArgCommon;
 using Buffalo.Kernel;
+using Buffalo.Kernel.TreadPoolManager;
 using FirewallSettingSSHLib;
 using FirewallSettingSSHLib.FWAdapter;
 using Library;
@@ -42,6 +43,10 @@ namespace FirewallSettingServerCore
                 return true;
             }
         }
+        /// <summary>
+        /// 自动刷新线程
+        /// </summary>
+        private static BlockThread _thdRefreash;
 
         static void Main(string[] args)
         {
@@ -65,7 +70,8 @@ namespace FirewallSettingServerCore
                 {
                     return;
                 }
-                _userMan.RefreashFirewall();
+                _thdRefreash = BlockThread.Create(RefreashHandle);
+                _thdRefreash.StartThread(null);
                 RunToRoll();
             }
             
@@ -74,6 +80,26 @@ namespace FirewallSettingServerCore
                 CloseServer();
             }
         }
+
+        /// <summary>
+        /// 自动刷新线程
+        /// </summary>
+        private static void RefreashHandle() 
+        {
+            DateTime _lastRefreash = DateTime.MinValue;
+
+            while (_server!=null && _server.IsListener) 
+            {
+                if (DateTime.Now.Subtract(_lastRefreash).TotalMinutes >= 5) 
+                {
+                    _userMan.RefreashFirewall();
+                    _lastRefreash = DateTime.Now;
+                }
+                Thread.Sleep(1000);
+            }
+
+        }
+
         /// <summary>
         /// 循环执行
         /// </summary>
@@ -260,13 +286,14 @@ namespace FirewallSettingServerCore
 
         private static void CloseServer() 
         {
+            
             if (_server != null)
             {
                 
                 try
                 {
                     _server.Stop();
-                    _server = null;
+                   
 
                     
                     Thread.Sleep(100);
@@ -278,6 +305,24 @@ namespace FirewallSettingServerCore
                     ApplicationLog.LogException("FirewallSetting", ex);
                 }
             }
+            if (_thdRefreash != null)
+            {
+
+                try
+                {
+                    _thdRefreash.StopThread();
+                    
+
+
+                    Thread.Sleep(100);
+                }
+                catch (Exception ex)
+                {
+                    ApplicationLog.LogException("FirewallSetting", ex);
+                }
+            }
+            _server = null;
+            _thdRefreash = null;
         }
 
         static void _authServices_OnException(Exception ex)
