@@ -29,10 +29,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 return true;
             }
-            if (CheckUFWStatus(ssh)) 
-            {
-                return true;
-            }
+            
             return false;
         }
 
@@ -67,35 +64,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             return ret;
         }
 
-        /// <summary>
-        /// 检查ufw
-        /// </summary>
-        /// <param name="ssh"></param>
-        /// <returns></returns>
-        private bool CheckUFWStatus(SshClient ssh) 
-        {
-            SshCommand cmd = RunCommand(ssh, "ufw status");//查看当前规则
-            string res = cmd.Result;
-
-            if (!string.IsNullOrWhiteSpace(res))
-            {
-                string line = null;
-                using (StringReader sr = new StringReader(res))
-                {
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        if (line.Contains("inactive"))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-
-            return false;
-            
-        }
+        
 
         public override bool InitSetting(SshClient ssh)
         {
@@ -151,11 +120,11 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if(numHeadIndex<0) 
+                    
+                    if (numHeadIndex<0) 
                     {
                         numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
-                        protHeadIndex= line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
-                        
+                        protHeadIndex = line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
                         continue;
                     }
                     if (line.IndexOf(ipHead) <= 0)
@@ -175,11 +144,11 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 while ((line = reader.ReadLine()) != null)
                 {
+                    
                     if (numHeadIndex < 0)
                     {
                         numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
                         protHeadIndex = line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
-                        
                         continue;
                     }
                     if (line.IndexOf(ipHead) <= 0)
@@ -403,12 +372,12 @@ namespace FirewallSettingSSHLib.FWAdapter
                     continue;
                 }
                 dicExistsLineNum[key] = true;
-                cmd.Add(CreateDeleteCommand(rule));
+                cmd.AddRange(CreateDeleteCommand(rule));
             }
 
             foreach(FirewallRule rule in lstCreateItem) 
             {
-                cmd.Add(CreateAddCommand(rule));
+                cmd.AddRange(CreateAddCommand(rule));
             }
 
             return cmd;
@@ -526,8 +495,9 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// 创建新增命令
         /// </summary>
         /// <returns></returns>
-        private string CreateAddCommand(FirewallRule rule)
+        protected virtual List<string> CreateAddCommand(FirewallRule rule)
         {
+            List<string> lst = new List<string>(); 
             string ipSet = rule.IP;
             bool isIPv6= IsIPv6(ipSet);
             StringBuilder sbCmd = new StringBuilder();
@@ -547,7 +517,8 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(rule.Port.ToString());
             sbCmd.Append("\" -j REJECT");
 
-            return sbCmd.ToString();
+            lst.Add(sbCmd.ToString());
+            return lst;
         }
 
         /// <summary>
@@ -555,7 +526,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// </summary>
         /// <param name="ipset"></param>
         /// <returns></returns>
-        private bool IsIPv6(string ipset) 
+        protected bool IsIPv6(string ipset) 
         {
             return string.Equals(ipset, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase);
         }
@@ -564,11 +535,11 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// 创建新增命令
         /// </summary>
         /// <returns></returns>
-        private string CreateDeleteCommand(FirewallRule rule)
+        protected virtual List<string> CreateDeleteCommand(FirewallRule rule)
         {
             string ipSet = rule.IP;
             bool isIPv6 = IsIPv6(ipSet);
-            
+            List<string> lst = new List<string>();
             StringBuilder sbCmd = new StringBuilder();
 
             if (isIPv6)
@@ -588,7 +559,8 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(" --destination-port \"");
             sbCmd.Append(rule.Port.ToString());
             sbCmd.Append("\" -j REJECT");
-            return sbCmd.ToString();
+            lst.Add(sbCmd.ToString());
+            return lst;
         }
 
 

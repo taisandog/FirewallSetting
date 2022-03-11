@@ -98,6 +98,15 @@ namespace SettingLib
                     return fwAdp;
                 }
             }
+            UFWiptablesAdapter ufwAdp = new UFWiptablesAdapter();
+            if (ufwAdp.CheckEnable(ssh))
+            {
+                if (ufwAdp.InitSetting(ssh))
+                {
+                    return ufwAdp;
+                }
+            }
+
 
             IPtableIPSetAdapter iptAdp = new IPtableIPSetAdapter();
             if (iptAdp.CheckEnable(ssh))
