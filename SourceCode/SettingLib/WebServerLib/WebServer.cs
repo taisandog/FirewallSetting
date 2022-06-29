@@ -1,4 +1,5 @@
 ﻿using Buffalo.ArgCommon;
+using Buffalo.Kernel.TreadPoolManager;
 using Library;
 using System;
 using System.Collections.Generic;
@@ -104,7 +105,7 @@ namespace WebServerLib
         /// <summary>
         /// 监听线程 
         /// </summary>
-        private Thread _thd;
+        private BlockThread _thd;
         public APIResault StartServer()
         {
             
@@ -121,8 +122,8 @@ namespace WebServerLib
             }
             
             _server.Start();
-            _thd = new Thread(new ThreadStart(DoListen));
-            _thd.Start();
+            _thd = BlockThread.Create(DoListen);
+            _thd.StartThread(null);
             return ApiCommon.GetSuccess();
         }
         /// <summary>
@@ -268,7 +269,7 @@ namespace WebServerLib
             {
                 try
                 {
-                    _thd.Abort();
+                    _thd.StopThread();
                 }
                 catch { }
             }

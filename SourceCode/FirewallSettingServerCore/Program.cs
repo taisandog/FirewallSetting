@@ -277,8 +277,9 @@ namespace FirewallSettingServerCore
             handle.Message = my;
             _server.OnException += _authServices_OnException;
             _server.UrlMap["Setting"] = handle;
+
             _server.StartServer();
-            
+       
             Console.WriteLine("服务启动成功，监听地址为:" + conUrl);
 
             return true;

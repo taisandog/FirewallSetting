@@ -56,22 +56,52 @@ namespace SettingLib
         private FWAdapterBase LoadAdapter()
         {
             string firewallType = AppSetting.Default["Server.FirewallType"];
-
-            if(string.Equals(firewallType, "iptables",StringComparison.CurrentCultureIgnoreCase)) 
-            {
-                return new IPtableIPSetAdapter();
-            }
-            if (string.Equals(firewallType, "firewalld", StringComparison.CurrentCultureIgnoreCase))
-            {
-                return new FirewalldIPSetAdapter();
-            }
-            if (string.Equals(firewallType, "nftable", StringComparison.CurrentCultureIgnoreCase))
-            {
-                return new NFTableAdapter();
-            }
             using (SshClient ssh = FirewallUnit.CreateSsh())
             {
                 ssh.Connect();
+
+                if (string.Equals(firewallType, "iptables", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    IPtableIPSetAdapter iptAdp = new IPtableIPSetAdapter();
+
+                    if (iptAdp.InitSetting(ssh))
+                    {
+                        return iptAdp;
+                    }
+
+                }
+                if (string.Equals(firewallType, "ufw", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    UFWiptablesAdapter ufwAdp = new UFWiptablesAdapter();
+
+                    if (ufwAdp.InitSetting(ssh))
+                    {
+                        return ufwAdp;
+                    }
+
+                }
+                if (string.Equals(firewallType, "firewalld", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
+
+                    if (fwAdp.InitSetting(ssh))
+                    {
+                        return fwAdp;
+                    }
+
+                }
+                if (string.Equals(firewallType, "nftable", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    NFTableAdapter nftAdp = new NFTableAdapter();
+                    if (nftAdp.InitSetting(ssh))
+                    {
+                        return nftAdp;
+                    }
+
+                }
+
+
+
                 return FindFirewalld(ssh);
             }
 

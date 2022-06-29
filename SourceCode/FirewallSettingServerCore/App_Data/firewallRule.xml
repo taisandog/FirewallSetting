@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-	<!--<rule name="supervisor查看" port="9001" protocol="tcp,udp"/>
-	<rule name="Web" port="80" protocol="tcp,udp"/>
+	<rule name="supervisor查看" port="9001" protocol="tcp,udp"/>
 
 
 	<rule name="Web2" port="8808" protocol="tcp,udp"/>
@@ -11,5 +10,5 @@
 
 	<rule name="MySQL" port="13880" protocol="tcp,udp"/>
 
-	<rule name="MongoDB" port="13881" protocol="tcp,udp"/>-->
+	<rule name="MongoDB" port="13881" protocol="tcp,udp"/>
 </root>

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows.Forms;
 using Microsoft.Win32;
 namespace FWSettingClient
@@ -15,12 +16,13 @@ namespace FWSettingClient
 			//
 		}
 
-		private static string autoRoot=Application.StartupPath+ "\\FWSettingClient.exe";
-		private const string keyName= "FWSettingClient";//注册表键名
+		public static string AutoRoot=Path.Combine(Application.StartupPath, "FWSettingClient.exe");
+		public static string KeyName= "FWSettingClient";//注册表键名
+
 		
 
 		/// <summary>
-		/// 设置是否自启动
+		/// 设置是否自启动(管理员)
 		/// </summary>
 		public static bool IsAutoRun
 		{
@@ -28,21 +30,48 @@ namespace FWSettingClient
 			{
                 
 				RegistryKey autoKey=Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",true);
-				return FindValue(autoKey,keyName);
+				return FindValue(autoKey, KeyName);
 			}
 			set
 			{
 				RegistryKey autoKey=Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",true);
 				if(value)
 				{
-					autoKey.SetValue(keyName,autoRoot);
+					autoKey.SetValue(KeyName, AutoRoot);
 				}
 				else
 				{
-					autoKey.DeleteValue(keyName,false);
+					autoKey.DeleteValue(KeyName, false);
 				}
 			}
 		}
+		
+
+		/// <summary>
+		/// 设置是否自启动(本用户)
+		/// </summary>
+		public static bool IsUserAutoRun
+		{
+			get
+			{
+
+				RegistryKey autoKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+				return FindValue(autoKey, KeyName);
+			}
+			set
+			{
+				RegistryKey autoKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+				if (value)
+				{
+					autoKey.SetValue(KeyName, AutoRoot);
+				}
+				else
+				{
+					autoKey.DeleteValue(KeyName, false);
+				}
+			}
+		}
+
 
 		/// <summary>
 		/// 注册表键中查找指定的项

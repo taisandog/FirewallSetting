@@ -195,6 +195,7 @@ namespace SettingLib
                     {
                         if (lst[0].IP == ip)
                         {
+                            UpdateLastDate(lst[0]);
                             return false;
                         }
                     }
@@ -272,7 +273,7 @@ namespace SettingLib
                 {
                     if(item.IP== ip)
                     {
-                        item.UpdateDate = now;
+                        UpdateLastDate(item);
                         return 0;
                     }
                 }
@@ -287,12 +288,18 @@ namespace SettingLib
             List<IpItem> lst = IPList;
             lock (lst)
             {
-                DateTime now = DateTime.Now;
+                
                 IpItem nitem = new IpItem();
-                nitem.UpdateDate = now;
+                UpdateLastDate(nitem );
                 nitem.IP = ip;
                 lst.Add(nitem);
             }
+        }
+
+        private void UpdateLastDate(IpItem nitem) 
+        {
+            DateTime now = DateTime.Now;
+            nitem.UpdateDate = now;
         }
 
         public static readonly string ServerName = AppSetting.Default["Server.Name"];

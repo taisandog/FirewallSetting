@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FirewallSettingSSHLib.FWAdapter
 {
-    public class IPtableIPSetAdapter: FWAdapterBase
+    public class IPtableIPSetAdapter : FWAdapterBase
     {
         public override string Name
         {
@@ -25,11 +25,11 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh)
         {
-            if (CheckIPTablesStatus(ssh)) 
+            if (CheckIPTablesStatus(ssh))
             {
                 return true;
             }
-            
+
             return false;
         }
 
@@ -38,7 +38,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// </summary>
         /// <param name="ssh"></param>
         /// <returns></returns>
-        private bool CheckIPTablesStatus(SshClient ssh) 
+        private bool CheckIPTablesStatus(SshClient ssh)
         {
             SshCommand cmd = RunCommand(ssh, "service iptables status");//查看当前规则
             string res = cmd.Result;
@@ -64,7 +64,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             return ret;
         }
 
-        
+
 
         public override bool InitSetting(SshClient ssh)
         {
@@ -74,35 +74,35 @@ namespace FirewallSettingSSHLib.FWAdapter
             return true;
         }
 
-        private void CheckIPSetInstall(SshClient ssh) 
+        private void CheckIPSetInstall(SshClient ssh)
         {
             SshCommand cmd = RunCommand(ssh, "ipset list");//查看当前规则
-            if (IsSuccess(cmd)) 
+            if (IsSuccess(cmd))
             {
                 return;
             }
-            if (cmd.Error.Contains("ipset: command not found",StringComparison.CurrentCultureIgnoreCase)) 
+            if (cmd.Error.Contains("ipset: command not found", StringComparison.CurrentCultureIgnoreCase))
             {
                 Console.WriteLine("正在安装ipset");
-                cmd= RunCommand(ssh, "apt-get -y install ipset libipset-dev");
+                cmd = RunCommand(ssh, "apt-get -y install ipset libipset-dev");
                 if (IsSuccess(cmd))
                 {
                     Console.WriteLine("安装ipset完毕");
                 }
-                else 
+                else
                 {
                     Console.WriteLine(cmd.Error);
                 }
             }
         }
-       
-            /// <summary>
-            /// 加载现存规则
-            /// </summary>
-            /// <param name="ssh">ssh</param>
-            /// <param name="repeatListNumber">重复的规则号</param>
-            /// <returns></returns>
-            private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh, List<FirewallRule> repeatListNumber)
+
+        /// <summary>
+        /// 加载现存规则
+        /// </summary>
+        /// <param name="ssh">ssh</param>
+        /// <param name="repeatListNumber">重复的规则号</param>
+        /// <returns></returns>
+        private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh, List<FirewallRule> repeatListNumber)
         {
             Dictionary<int, bool> dicPort = LoadRulePort();
             int numHeadIndex = -1;
@@ -112,16 +112,16 @@ namespace FirewallSettingSSHLib.FWAdapter
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
 
 
-            SshCommand cmd = RunCommand(ssh,"iptables -nvL INPUT --line-number");//查看当前规则
+            SshCommand cmd = RunCommand(ssh, "iptables -nvL INPUT --line-number");//查看当前规则
             string res = cmd.Result;
             ipHead = "! match-set " + IPSetName;
-            
+
             using (StringReader reader = new StringReader(res))
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    
-                    if (numHeadIndex<0) 
+
+                    if (numHeadIndex < 0)
                     {
                         numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
                         protHeadIndex = line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
@@ -135,7 +135,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                 }
             }
 
-            cmd = RunCommand(ssh,"ip6tables -nvL INPUT --line-number");//查看当前规则
+            cmd = RunCommand(ssh, "ip6tables -nvL INPUT --line-number");//查看当前规则
             res = cmd.Result;
             ipHead = "! match-set " + IPSetNameV6;
             numHeadIndex = -1;
@@ -144,7 +144,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 while ((line = reader.ReadLine()) != null)
                 {
-                    
+
                     if (numHeadIndex < 0)
                     {
                         numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
@@ -171,18 +171,18 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="numHeadIndex">num列的起始索引</param>
         /// <param name="protHeadIndex">prot列的起始索引</param>
         /// <param name="dicExists">当前集合</param>
-        private void FillRule(string line,string ipSet, int numHeadIndex, int protHeadIndex,
-            Dictionary<string, FirewallRule> dicExists, List<FirewallRule> repeatListNumber) 
+        private void FillRule(string line, string ipSet, int numHeadIndex, int protHeadIndex,
+            Dictionary<string, FirewallRule> dicExists, List<FirewallRule> repeatListNumber)
         {
             //string head = "! match-set "+ ipSet;
-            
+
             int port = GetPort(line);
-            if (port <= 0) 
+            if (port <= 0)
             {
                 return;
             }
             string protocol = GetProtocol(line, protHeadIndex);
-            if (string.IsNullOrWhiteSpace(protocol)) 
+            if (string.IsNullOrWhiteSpace(protocol))
             {
                 return;
             }
@@ -192,7 +192,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                 return;
             }
             string key = GetKey(ipSet, port, protocol);
-            FirewallRule urle=new FirewallRule(ipSet, port, protocol);
+            FirewallRule urle = new FirewallRule(ipSet, port, protocol);
             urle.LineNum = num;
             if (dicExists.ContainsKey(key))
             {
@@ -246,7 +246,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        private int GetPort(string line) 
+        private int GetPort(string line)
         {
             try
             {
@@ -261,7 +261,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                 string sport = line.Substring(index, end - index);
                 return sport.ConvertTo<int>();
             }
-            catch 
+            catch
             {
                 return 0;
             }
@@ -277,11 +277,11 @@ namespace FirewallSettingSSHLib.FWAdapter
             List<string> cmd = CreateCommand(ssh);
             foreach (string command in cmd)
             {
-                res = RunCommand(ssh,command);
+                res = RunCommand(ssh, command);
                 ApplicationLog.LogCmdError(res);
             }
-            res = RunCommand(ssh,"service iptables save");
-            res = RunCommand(ssh,"service ip6tables save");
+            res = RunCommand(ssh, "service iptables save");
+            res = RunCommand(ssh, "service ip6tables save");
             ApplicationLog.LogCmdError(res);
         }
 
@@ -308,15 +308,15 @@ namespace FirewallSettingSSHLib.FWAdapter
                     {
                         continue;
                     }
-                    if (line.StartsWith("Members:", StringComparison.CurrentCultureIgnoreCase)) 
+                    if (line.StartsWith("Members:", StringComparison.CurrentCultureIgnoreCase))
                     {
                         state = 1;//开始读取IP
                         continue;
                     }
-                    switch (state) 
+                    switch (state)
                     {
                         case 1:
-                            existsIP[line.Trim()]=true;
+                            existsIP[line.Trim()] = true;
                             break;
                         default:
                             break;
@@ -337,7 +337,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             List<FirewallRule> willDelete = new List<FirewallRule>();
 
             List<FirewallRule> lstCreateItem = new List<FirewallRule>();//需要创建的列表
-           
+
 
             UpdateIPset(ssh, cmd);
 
@@ -345,11 +345,11 @@ namespace FirewallSettingSSHLib.FWAdapter
 
 
             FirewallRule tmp = null;
-            for (int i=0;i< willDelete.Count-1; i++) 
+            for (int i = 0; i < willDelete.Count - 1; i++)
             {
-                for(int j = i + 1; j < willDelete.Count; j++) 
+                for (int j = i + 1; j < willDelete.Count; j++)
                 {
-                    if(willDelete[i].LineNum< willDelete[j].LineNum) 
+                    if (willDelete[i].LineNum < willDelete[j].LineNum)
                     {
                         tmp = willDelete[i];
                         willDelete[i] = willDelete[j];
@@ -360,14 +360,14 @@ namespace FirewallSettingSSHLib.FWAdapter
 
             Dictionary<string, bool> dicExistsLineNum = new Dictionary<string, bool>();//已存在的行数
             StringBuilder sbKey = null; ;
-            foreach(FirewallRule rule in willDelete) 
+            foreach (FirewallRule rule in willDelete)
             {
                 sbKey = new StringBuilder();
                 sbKey.Append(rule.LineNum.ToString());
                 sbKey.Append(".");
-                sbKey.Append(IsIPv6(rule.IP)?"v6":"v4");
+                sbKey.Append(IsIPv6(rule.IP) ? "v6" : "v4");
                 string key = sbKey.ToString();
-                if (dicExistsLineNum.ContainsKey(key)) 
+                if (dicExistsLineNum.ContainsKey(key))
                 {
                     continue;
                 }
@@ -375,7 +375,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                 cmd.AddRange(CreateDeleteCommand(rule));
             }
 
-            foreach(FirewallRule rule in lstCreateItem) 
+            foreach (FirewallRule rule in lstCreateItem)
             {
                 cmd.AddRange(CreateAddCommand(rule));
             }
@@ -428,7 +428,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <summary>
         /// 获取更新ip集合的指令
         /// </summary>
-        private void UpdateIPset(SshClient ssh,List<string> cmd) 
+        private void UpdateIPset(SshClient ssh, List<string> cmd)
         {
             List<string> lstIP = LoadUserIP();
             Dictionary<string, bool> existsIP = new Dictionary<string, bool>();
@@ -497,15 +497,15 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         protected virtual List<string> CreateAddCommand(FirewallRule rule)
         {
-            List<string> lst = new List<string>(); 
+            List<string> lst = new List<string>();
             string ipSet = rule.IP;
-            bool isIPv6= IsIPv6(ipSet);
+            bool isIPv6 = IsIPv6(ipSet);
             StringBuilder sbCmd = new StringBuilder();
             if (isIPv6)
             {
                 sbCmd.Append("ip6tables");
             }
-            else 
+            else
             {
                 sbCmd.Append("iptables");
             }
@@ -526,7 +526,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// </summary>
         /// <param name="ipset"></param>
         /// <returns></returns>
-        protected bool IsIPv6(string ipset) 
+        protected bool IsIPv6(string ipset)
         {
             return string.Equals(ipset, IPSetNameV6, StringComparison.CurrentCultureIgnoreCase);
         }
@@ -572,15 +572,16 @@ namespace FirewallSettingSSHLib.FWAdapter
 
             SshCommand cmd = RunCommand(ssh, sbCmd.ToString());//查看当前规则
             string res = cmd.Result;
+            string err = cmd.Error;
             string line = null;
             if (!string.IsNullOrWhiteSpace(res)) //已存在则退出
             {
-                using (StringReader sr = new StringReader(res)) 
+                using (StringReader sr = new StringReader(res))
                 {
-                    while ((line = sr.ReadLine()) != null) 
+                    while ((line = sr.ReadLine()) != null)
                     {
                         line = line.Replace(" ", "");
-                        if(string.Equals(line, "Name:" + setName, StringComparison.CurrentCultureIgnoreCase)) 
+                        if (string.Equals(line, "Name:" + setName, StringComparison.CurrentCultureIgnoreCase))
                         {
                             return;
                         }
@@ -598,12 +599,12 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 sbCmd.Append(" family inet6");
             }
-            else 
+            else
             {
                 sbCmd.Append(" family inet");
             }
             sbCmd.Append(" maxelem 1000000");
-            
+
             cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
             ApplicationLog.LogCmdError(cmd);
 

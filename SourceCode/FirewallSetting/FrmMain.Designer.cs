@@ -32,6 +32,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.gbMain = new System.Windows.Forms.GroupBox();
             this.dgMembers = new System.Windows.Forms.DataGridView();
+            this.ColUserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColMultipleIP = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.cmUser = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsNewUser = new System.Windows.Forms.ToolStripMenuItem();
             this.tsRePwd = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,6 +44,8 @@
             this.tsOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.dgRules = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
             this.Btn_Disconnect = new System.Windows.Forms.Button();
             this.Btn_Connect = new System.Windows.Forms.Button();
@@ -49,11 +54,7 @@
             this.btnSave = new System.Windows.Forms.Button();
             this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
             this.mbDisplay = new Library.MessageBox();
-            this.ColUserName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColIP = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColMultipleIP = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColNumber = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.chkAutoRun = new System.Windows.Forms.CheckBox();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgMembers)).BeginInit();
             this.cmUser.SuspendLayout();
@@ -97,6 +98,30 @@
             this.dgMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgMembers.Size = new System.Drawing.Size(761, 222);
             this.dgMembers.TabIndex = 1;
+            // 
+            // ColUserName
+            // 
+            this.ColUserName.DataPropertyName = "UserName";
+            this.ColUserName.FillWeight = 76.99991F;
+            this.ColUserName.HeaderText = "名字";
+            this.ColUserName.Name = "ColUserName";
+            this.ColUserName.ReadOnly = true;
+            // 
+            // ColIP
+            // 
+            this.ColIP.DataPropertyName = "IPText";
+            this.ColIP.FillWeight = 123.8578F;
+            this.ColIP.HeaderText = "IP";
+            this.ColIP.Name = "ColIP";
+            this.ColIP.ReadOnly = true;
+            // 
+            // ColMultipleIP
+            // 
+            this.ColMultipleIP.DataPropertyName = "MultipleIP";
+            this.ColMultipleIP.FillWeight = 43.14219F;
+            this.ColMultipleIP.HeaderText = "多IP";
+            this.ColMultipleIP.Name = "ColMultipleIP";
+            this.ColMultipleIP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // cmUser
             // 
@@ -183,6 +208,22 @@
             this.dgRules.Size = new System.Drawing.Size(187, 194);
             this.dgRules.TabIndex = 2;
             // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "Name";
+            this.dataGridViewTextBoxColumn1.FillWeight = 169.5432F;
+            this.dataGridViewTextBoxColumn1.HeaderText = "名字";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            // 
+            // ColNumber
+            // 
+            this.ColNumber.DataPropertyName = "RuleCount";
+            this.ColNumber.FillWeight = 30.45686F;
+            this.ColNumber.HeaderText = "个数";
+            this.ColNumber.Name = "ColNumber";
+            this.ColNumber.ReadOnly = true;
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.Btn_Disconnect);
@@ -228,6 +269,7 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.chkAutoRun);
             this.panel2.Controls.Add(this.btnSave);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel2.Location = new System.Drawing.Point(627, 0);
@@ -264,45 +306,16 @@
             this.mbDisplay.Size = new System.Drawing.Size(960, 238);
             this.mbDisplay.TabIndex = 0;
             // 
-            // ColUserName
+            // chkAutoRun
             // 
-            this.ColUserName.DataPropertyName = "UserName";
-            this.ColUserName.FillWeight = 76.99991F;
-            this.ColUserName.HeaderText = "名字";
-            this.ColUserName.Name = "ColUserName";
-            this.ColUserName.ReadOnly = true;
-            // 
-            // ColIP
-            // 
-            this.ColIP.DataPropertyName = "IPText";
-            this.ColIP.FillWeight = 123.8578F;
-            this.ColIP.HeaderText = "IP";
-            this.ColIP.Name = "ColIP";
-            this.ColIP.ReadOnly = true;
-            // 
-            // ColMultipleIP
-            // 
-            this.ColMultipleIP.DataPropertyName = "MultipleIP";
-            this.ColMultipleIP.FillWeight = 43.14219F;
-            this.ColMultipleIP.HeaderText = "多IP";
-            this.ColMultipleIP.Name = "ColMultipleIP";
-            this.ColMultipleIP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "Name";
-            this.dataGridViewTextBoxColumn1.FillWeight = 169.5432F;
-            this.dataGridViewTextBoxColumn1.HeaderText = "名字";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // ColNumber
-            // 
-            this.ColNumber.DataPropertyName = "RuleCount";
-            this.ColNumber.FillWeight = 30.45686F;
-            this.ColNumber.HeaderText = "个数";
-            this.ColNumber.Name = "ColNumber";
-            this.ColNumber.ReadOnly = true;
+            this.chkAutoRun.AutoSize = true;
+            this.chkAutoRun.Location = new System.Drawing.Point(208, 15);
+            this.chkAutoRun.Name = "chkAutoRun";
+            this.chkAutoRun.Size = new System.Drawing.Size(93, 25);
+            this.chkAutoRun.TabIndex = 1;
+            this.chkAutoRun.Text = "开机启动";
+            this.chkAutoRun.UseVisualStyleBackColor = true;
+            this.chkAutoRun.Click += new System.EventHandler(this.chkAutoRun_Click);
             // 
             // FrmMain
             // 
@@ -327,6 +340,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgRules)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -357,6 +371,7 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn ColMultipleIP;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColNumber;
+        private System.Windows.Forms.CheckBox chkAutoRun;
     }
 }
 

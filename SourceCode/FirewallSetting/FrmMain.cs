@@ -1,6 +1,7 @@
 ﻿using Buffalo.DB.CacheManager;
 using Buffalo.DBTools;
 using Buffalo.Kernel.TreadPoolManager;
+using FWSettingClient;
 using Library;
 using NetFwTypeLib;
 using SettingLib;
@@ -82,8 +83,15 @@ namespace FirewallSetting
             List<FirewallItem> rule = GetRule();
             dgRules.DataSource = rule;
             _userMan.FirewallRule = rule;
+            chkAutoRun.Checked = RegConfig.IsUserAutoRun;
             SetTitle();
+            if (Program.IsAuto) 
+            {
+                Btn_Connect_Click(Btn_Connect,new EventArgs());
+            }
         }
+
+
         /// <summary>
         /// 设置标题
         /// </summary>
@@ -415,6 +423,11 @@ namespace FirewallSetting
         private void BtnSave_Click(object sender, EventArgs e)
         {
             _userMan.SaveConfig();
+        }
+
+        private void chkAutoRun_Click(object sender, EventArgs e)
+        {
+            RegConfig.IsUserAutoRun = chkAutoRun.Checked;
         }
     }
     
