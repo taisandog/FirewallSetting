@@ -66,15 +66,20 @@ namespace FWSettingClient
         private bool _running = false;
 
         private  const int Sleep =  1000;
+
+        /// <summary>
+        /// 最后更新时间
+        /// </summary>
+        DateTime _lastRun = DateTime.MinValue;
         private void DoAuto()
         {
-            DateTime lastRun = DateTime.MinValue;
+            
             while (_running)
             {
-                if (DateTime.Now.Subtract(lastRun).TotalMinutes >= 5)
+                if (DateTime.Now.Subtract(_lastRun).TotalMinutes >= 5)
                 {
                     UpdateIP();
-                    lastRun = DateTime.Now;
+                    _lastRun = DateTime.Now;
                 }
                 Thread.Sleep(Sleep);
             }
@@ -102,42 +107,67 @@ namespace FWSettingClient
         /// </summary>
         private void UpdateIP()
         {
-            long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now, true, true);
+            
             Queue<FWUser> que = null;
             lock (_curUser)
             {
                 que = new Queue<FWUser>(_curUser);
             }
-            APIResault res = null;
-            string sign = null;
+
+            Queue<Task> queTask = new Queue<Task>();
             foreach (FWUser user in que)
             {
-                if (user.V2 == "1")
+                Task tsk = Task.Run(() =>
                 {
-                    res = user.Handle.GetIP();
-                    if (!res.IsSuccess)
-                    {
-                        mess.LogError(user.Name + ":" + res.Message);
-                        continue;
-                    }
-                    string ip = res.GetValue<string>();
-                    sign = user.GetSignV2(tick, ip);
-                }
-                else 
+                    DoUpdate(user);
+                });
+                queTask.Enqueue(tsk);
+            }
+            while (queTask.Count > 0) 
+            {
+                Task tsk = queTask.Dequeue();
+                if (tsk == null) 
                 {
-                    sign = user.GetSign(tick);
+                    continue;
                 }
-                res = user.Handle.UpdateAddress(user.UserName, tick, sign);
+                tsk.Wait(1000);
+            }
+
+        }
+
+        private void DoUpdate(FWUser user) 
+        {
+            long tick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now, true, true);
+            if (user == null) 
+            {
+                return;
+            }
+            APIResault res = null;
+            string sign = null;
+            if (user.V2 == "1")
+            {
+                res = user.Handle.GetIP();
                 if (!res.IsSuccess)
                 {
                     mess.LogError(user.Name + ":" + res.Message);
-                    continue;
+                    return;
                 }
-                mess.Log(user.Name + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  进行了IP同步");
+                string ip = res.GetValue<string>();
+                sign = user.GetSignV2(tick, ip);
             }
-
-
+            else
+            {
+                sign = user.GetSign(tick);
+            }
+            res = user.Handle.UpdateAddress(user.UserName, tick, sign);
+            if (!res.IsSuccess)
+            {
+                mess.LogError(user.Name + ":" + res.Message);
+                return ;
+            }
+            mess.Log(user.Name + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  进行了IP同步");
         }
+
 
         private void btnOK_Click(object sender, EventArgs e)
         {
@@ -242,7 +272,7 @@ namespace FWSettingClient
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            UpdateIP();
+            _lastRun = DateTime.MinValue;
         }
     }
 }
