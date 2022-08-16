@@ -206,7 +206,7 @@ namespace SettingLib
             }
             return change > 0;
         }
-        public static int IPTimeOutMilliseconds = 60 * 60 * 1000;
+        public static double IPTimeOutMilliseconds = 60 * 60 * 1000;
         /// <summary>
         /// 删除过期IP
         /// </summary>

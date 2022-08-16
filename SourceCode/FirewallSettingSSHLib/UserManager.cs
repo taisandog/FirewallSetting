@@ -112,14 +112,7 @@ namespace SettingLib
         /// <returns></returns>
         private FWAdapterBase FindFirewalld(SshClient ssh) 
         {
-            NFTableAdapter nftAdp = new NFTableAdapter();
-            if (nftAdp.CheckEnable(ssh))
-            {
-                if (nftAdp.InitSetting(ssh))
-                {
-                    return nftAdp;
-                }
-            }
+            
             FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
             if (fwAdp.CheckEnable(ssh))
             {
@@ -146,7 +139,15 @@ namespace SettingLib
                     return iptAdp;
                 }
             }
-            
+
+            NFTableAdapter nftAdp = new NFTableAdapter();
+            if (nftAdp.CheckEnable(ssh))
+            {
+                if (nftAdp.InitSetting(ssh))
+                {
+                    return nftAdp;
+                }
+            }
             return null;
         }
 
