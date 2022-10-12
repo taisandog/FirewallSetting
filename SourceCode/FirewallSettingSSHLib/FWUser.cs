@@ -247,12 +247,6 @@ namespace SettingLib
                     {
                         ret.Add(item.IP);
                     }
-                    
-                    return ret;
-                }
-                if (lst.Count == 1)
-                {
-                    ret.Add(lst[0].IP);
                 }
             }
             return ret;

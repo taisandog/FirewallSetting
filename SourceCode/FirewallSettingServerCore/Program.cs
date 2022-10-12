@@ -19,7 +19,7 @@ namespace FirewallSettingServerCore
         private static UserManager _userMan;
         private static WebServer _server;
         private static readonly string FirewallRule = System.Configuration.ConfigurationManager.AppSettings["Firewall.Rule"];
-        
+        private const string Version = "2.2.9";
         public bool ShowLog
         {
             get
@@ -58,6 +58,8 @@ namespace FirewallSettingServerCore
                 Console.WriteLine(res.Message);
                 return;
             }
+
+            Console.WriteLine("Version:" + Version);
             Console.WriteLine("FirewallType:"+ _userMan.FWHandle.Name);
             Console.WriteLine("Log:" + ApplicationLog.BaseRoot);  
             FWUser.IsServer = true;

@@ -254,20 +254,17 @@ namespace SettingLib
             List<IpItem> lst = IPList;
             lock (lst)
             {
-                if (_multipleIP)
-                {
-                    DeleteOld();
+                DeleteOld();
+                
                     foreach (IpItem item in lst)
                     {
                         ret.Add(item.IP);
                     }
-                    
-                    return ret;
-                }
-                if (lst.Count == 1)
-                {
-                    ret.Add(lst[0].IP);
-                }
+                
+                //if (lst.Count == 1)
+                //{
+                //    ret.Add(lst[0].IP);
+                //}
             }
             return ret;
         }

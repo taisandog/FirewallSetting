@@ -35,26 +35,26 @@
             this.chkAuto = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.mess = new Library.MessageBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.dgUsers = new System.Windows.Forms.DataGridView();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.csUser = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsAdd = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsDelete = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.手动同步IPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsSync = new System.Windows.Forms.ToolStripMenuItem();
             this.btnLoad = new System.Windows.Forms.ToolStripMenuItem();
-            this.csUser = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsDelete = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsAdd = new System.Windows.Forms.ToolStripMenuItem();
-            this.mess = new Library.MessageBox();
             this.tsHide = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsExit = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgUsers)).BeginInit();
-            this.menuStrip1.SuspendLayout();
             this.csUser.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnUpdate
@@ -108,6 +108,18 @@
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             // 
+            // mess
+            // 
+            this.mess.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mess.Font = new System.Drawing.Font("宋体", 10F);
+            this.mess.Location = new System.Drawing.Point(3, 25);
+            this.mess.Name = "mess";
+            this.mess.ShowError = true;
+            this.mess.ShowLog = true;
+            this.mess.ShowWarning = true;
+            this.mess.Size = new System.Drawing.Size(637, 258);
+            this.mess.TabIndex = 6;
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.dgUsers);
@@ -148,6 +160,28 @@
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.ReadOnly = true;
             // 
+            // csUser
+            // 
+            this.csUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsAdd,
+            this.tsDelete});
+            this.csUser.Name = "csUser";
+            this.csUser.Size = new System.Drawing.Size(101, 48);
+            // 
+            // tsAdd
+            // 
+            this.tsAdd.Name = "tsAdd";
+            this.tsAdd.Size = new System.Drawing.Size(100, 22);
+            this.tsAdd.Text = "添加";
+            this.tsAdd.Click += new System.EventHandler(this.TsAdd_Click);
+            // 
+            // tsDelete
+            // 
+            this.tsDelete.Name = "tsDelete";
+            this.tsDelete.Size = new System.Drawing.Size(100, 22);
+            this.tsDelete.Text = "删除";
+            this.tsDelete.Click += new System.EventHandler(this.TsDelete_Click);
+            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -173,69 +207,35 @@
             // tsSync
             // 
             this.tsSync.Name = "tsSync";
-            this.tsSync.Size = new System.Drawing.Size(180, 22);
+            this.tsSync.Size = new System.Drawing.Size(148, 22);
             this.tsSync.Text = "手动同步ID";
             this.tsSync.Click += new System.EventHandler(this.TsSync_Click);
             // 
             // btnLoad
             // 
             this.btnLoad.Name = "btnLoad";
-            this.btnLoad.Size = new System.Drawing.Size(180, 22);
+            this.btnLoad.Size = new System.Drawing.Size(148, 22);
             this.btnLoad.Text = "载入用户配置";
             this.btnLoad.Click += new System.EventHandler(this.BtnLoad_Click);
-            // 
-            // csUser
-            // 
-            this.csUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsAdd,
-            this.tsDelete});
-            this.csUser.Name = "csUser";
-            this.csUser.Size = new System.Drawing.Size(101, 48);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
-            // 
-            // tsExit
-            // 
-            this.tsExit.Name = "tsExit";
-            this.tsExit.Size = new System.Drawing.Size(180, 22);
-            this.tsExit.Text = "退出";
-            this.tsExit.Click += new System.EventHandler(this.TsExit_Click);
-            // 
-            // tsDelete
-            // 
-            this.tsDelete.Name = "tsDelete";
-            this.tsDelete.Size = new System.Drawing.Size(100, 22);
-            this.tsDelete.Text = "删除";
-            this.tsDelete.Click += new System.EventHandler(this.TsDelete_Click);
-            // 
-            // tsAdd
-            // 
-            this.tsAdd.Name = "tsAdd";
-            this.tsAdd.Size = new System.Drawing.Size(100, 22);
-            this.tsAdd.Text = "添加";
-            this.tsAdd.Click += new System.EventHandler(this.TsAdd_Click);
-            // 
-            // mess
-            // 
-            this.mess.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mess.Font = new System.Drawing.Font("宋体", 10F);
-            this.mess.Location = new System.Drawing.Point(3, 25);
-            this.mess.Name = "mess";
-            this.mess.ShowError = true;
-            this.mess.ShowLog = true;
-            this.mess.ShowWarning = true;
-            this.mess.Size = new System.Drawing.Size(637, 258);
-            this.mess.TabIndex = 6;
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(145, 6);
             // 
             // tsHide
             // 
             this.tsHide.Name = "tsHide";
-            this.tsHide.Size = new System.Drawing.Size(180, 22);
+            this.tsHide.Size = new System.Drawing.Size(148, 22);
             this.tsHide.Text = "隐藏";
             this.tsHide.Click += new System.EventHandler(this.tsHide_Click);
+            // 
+            // tsExit
+            // 
+            this.tsExit.Name = "tsExit";
+            this.tsExit.Size = new System.Drawing.Size(148, 22);
+            this.tsExit.Text = "退出";
+            this.tsExit.Click += new System.EventHandler(this.TsExit_Click);
             // 
             // FrmMain
             // 
@@ -259,9 +259,9 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgUsers)).EndInit();
+            this.csUser.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.csUser.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 

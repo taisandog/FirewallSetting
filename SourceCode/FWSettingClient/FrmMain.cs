@@ -114,24 +114,18 @@ namespace FWSettingClient
                 que = new Queue<FWUser>(_curUser);
             }
 
-            Queue<Task> queTask = new Queue<Task>();
+            List<Task> lstTask = new List<Task>();
             foreach (FWUser user in que)
             {
                 Task tsk = Task.Run(() =>
                 {
                     DoUpdate(user);
                 });
-                queTask.Enqueue(tsk);
+                lstTask.Add(tsk);
             }
-            while (queTask.Count > 0) 
-            {
-                Task tsk = queTask.Dequeue();
-                if (tsk == null) 
-                {
-                    continue;
-                }
-                tsk.Wait(1000);
-            }
+
+            Task.WaitAll(lstTask.ToArray(), 10000);
+            
 
         }
 

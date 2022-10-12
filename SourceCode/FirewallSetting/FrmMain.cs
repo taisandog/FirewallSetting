@@ -354,6 +354,7 @@ namespace FirewallSetting
                 return;
             }
             user.Secret = FWUser.CreateSecret();
+            
             _userMan.SaveConfig();
             System.Windows.Forms.MessageBox.Show("重置完毕", "提示");
         }
@@ -371,6 +372,7 @@ namespace FirewallSetting
                 {
                     FWUser user = new FWUser();
                     user.UserName = frm.InputText;
+                    user.V2 = "1";
                     user.Secret = FWUser.CreateSecret();
                     _userMan.AddUser(user);
                     _userMan.SaveConfig();
