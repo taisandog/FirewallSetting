@@ -19,7 +19,7 @@ namespace FirewallSettingServerCore
         private static UserManager _userMan;
         private static WebServer _server;
         private static readonly string FirewallRule = System.Configuration.ConfigurationManager.AppSettings["Firewall.Rule"];
-        private const string Version = "2.2.9";
+        private static readonly string Version = typeof(Program).Assembly.GetName().Version.ToString();
         public bool ShowLog
         {
             get
