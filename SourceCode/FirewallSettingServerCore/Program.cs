@@ -19,7 +19,7 @@ namespace FirewallSettingServerCore
         private static UserManager _userMan;
         private static WebServer _server;
         private static readonly string FirewallRule = System.Configuration.ConfigurationManager.AppSettings["Firewall.Rule"];
-        private static readonly string Version = typeof(Program).Assembly.GetName().Version.ToString();
+        
         public bool ShowLog
         {
             get
@@ -58,8 +58,8 @@ namespace FirewallSettingServerCore
                 Console.WriteLine(res.Message);
                 return;
             }
-
-            Console.WriteLine("Version:" + Version);
+            string version = typeof(Program).Assembly.GetName().Version.ToString();
+            Console.WriteLine("Version:" + version);
             Console.WriteLine("FirewallType:"+ _userMan.FWHandle.Name);
             Console.WriteLine("Log:" + ApplicationLog.BaseRoot);  
             FWUser.IsServer = true;
@@ -94,7 +94,14 @@ namespace FirewallSettingServerCore
             {
                 if (DateTime.Now.Subtract(_lastRefreash).TotalMinutes >= 5) 
                 {
-                    _userMan.RefreashFirewall();
+                    try
+                    {
+                        _userMan.RefreashFirewall();
+                    }
+                    catch (Exception ex)
+                    {
+                        ApplicationLog.LogException("FirewallSetting", ex);
+                    }
                     _lastRefreash = DateTime.Now;
                 }
                 Thread.Sleep(1000);
@@ -126,14 +133,14 @@ namespace FirewallSettingServerCore
 
                         if (string.Equals(commands[0], "exit", StringComparison.CurrentCultureIgnoreCase))//退出
                         {
-                            Console.WriteLine("关闭中");
+                            Console.WriteLine("Exiting");
 
                             break;
                         }
                         else if (string.Equals(commands[0], "refreash", StringComparison.CurrentCultureIgnoreCase))//刷新防火墙
                         {
                             _userMan.RefreashFirewall();
-                            Console.WriteLine("刷新完毕");
+                            Console.WriteLine("Refreash Finish");
                         }
                         else if (string.Equals(commands[0], "clear", StringComparison.CurrentCultureIgnoreCase))//清屏
                         {
@@ -282,7 +289,7 @@ namespace FirewallSettingServerCore
 
             _server.StartServer();
        
-            Console.WriteLine("服务启动成功，监听地址为:" + conUrl);
+            Console.WriteLine("Start finish,listen Url:" + conUrl);
 
             return true;
         }

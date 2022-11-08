@@ -109,83 +109,85 @@ namespace SettingLib
         [WebMethod]
         public APIResault UpdateAddress(string args, HttpListenerRequest request)
         {
-            string remoteIP = GetIP(request);
-            string blockkey = KeyHead + remoteIP;
-
-            long curTick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now, true, true);
-
-            APIResault res = CheckBlockIP(blockkey,remoteIP, curTick);
-            if (!res.IsSuccess) 
-            {
-                return res;
-            }
             
+                string remoteIP = GetIP(request);
+                string blockkey = KeyHead + remoteIP;
 
-            ArgValues arg = ApiCommon.GetArgs(args);
-            long tick = arg.GetDataValue<long>("Tick");
-            string name = arg.GetDataValue<string>("Name");
-            string sign = arg.GetDataValue<string>("Sign");
-            bool isV2 = arg.GetDataValue<string>("V2")=="1";
+                long curTick = (long)CommonMethods.ConvertDateTimeInt(DateTime.Now, true, true);
 
-            res = CheckPacket(curTick, name, tick);
-            if (!res.IsSuccess)
-            {
-                return res;
-            }
-
-            FWUser user = _userMan.GetUser(name);
-            if (user == null)
-            {
-                return ApiCommon.GetFault("找不到用户:" + name);
-            }
-
-            string cntkey = KeyCntHead + remoteIP;
-            string cursign = null;
-            if (!isV2)
-            {
-                if (ForceV2) 
+                APIResault res = CheckBlockIP(blockkey, remoteIP, curTick);
+                if (!res.IsSuccess)
                 {
-                    return ApiCommon.GetFault("本程序强制用V2验证");
+                    return res;
                 }
-                cursign = user.GetSign(tick);
-            }
-            else 
-            {
-                cursign = user.GetSignV2(tick, remoteIP);
-            }
-            if (!string.Equals(cursign, sign, StringComparison.CurrentCultureIgnoreCase))
-            {
 
-                int times = _cache.GetValue<int>(cntkey);
-                times++;
-                string err = null;
-                if (times >= BlockTimes)
+
+                ArgValues arg = ApiCommon.GetArgs(args);
+                long tick = arg.GetDataValue<long>("Tick");
+                string name = arg.GetDataValue<string>("Name");
+                string sign = arg.GetDataValue<string>("Sign");
+                bool isV2 = arg.GetDataValue<string>("V2") == "1";
+
+                res = CheckPacket(curTick, name, tick);
+                if (!res.IsSuccess)
                 {
-                    _cache.SetValue<long>(blockkey, curTick,SetValueType.Set, BlockSecond);
-                    _cache.DeleteValue(cntkey);
-                    err = "效验错误,IP被屏蔽:" + remoteIP;
+                    return res;
+                }
+
+                FWUser user = _userMan.GetUser(name);
+                if (user == null)
+                {
+                    return ApiCommon.GetFault("找不到用户:" + name);
+                }
+
+                string cntkey = KeyCntHead + remoteIP;
+                string cursign = null;
+                if (!isV2)
+                {
+                    if (ForceV2)
+                    {
+                        return ApiCommon.GetFault("本程序强制用V2验证");
+                    }
+                    cursign = user.GetSign(tick);
                 }
                 else
                 {
-                    _cache.SetValue<int>(cntkey, times, SetValueType.Set, BlockSecond);
-                    err = "效验错误,错误次数:" + times;
+                    cursign = user.GetSignV2(tick, remoteIP);
                 }
-                return ApiCommon.GetFault(err);
-            }
-            _cache.DeleteValue(cntkey);
-            if (!user.UpdateIP(remoteIP))
-            {
+                if (!string.Equals(cursign, sign, StringComparison.CurrentCultureIgnoreCase))
+                {
+
+                    int times = _cache.GetValue<int>(cntkey);
+                    times++;
+                    string err = null;
+                    if (times >= BlockTimes)
+                    {
+                        _cache.SetValue<long>(blockkey, curTick, SetValueType.Set, BlockSecond);
+                        _cache.DeleteValue(cntkey);
+                        err = "效验错误,IP被屏蔽:" + remoteIP;
+                    }
+                    else
+                    {
+                        _cache.SetValue<int>(cntkey, times, SetValueType.Set, BlockSecond);
+                        err = "效验错误,错误次数:" + times;
+                    }
+                    return ApiCommon.GetFault(err);
+                }
+                _cache.DeleteValue(cntkey);
+                if (!user.UpdateIP(remoteIP))
+                {
+                    return ApiCommon.GetSuccess();
+                }
+                _userMan.SaveConfig();
+                _userMan.RefreashFirewall();
+
+                _form.OnUserUpdate();
+                if (_message != null && _message.ShowLog)
+                {
+                    _message.Log("用户:" + name + "，的IP更新为:" + remoteIP);
+                }
                 return ApiCommon.GetSuccess();
-            }
-            _userMan.SaveConfig();
-            _userMan.RefreashFirewall();
             
-            _form.OnUserUpdate();
-            if (_message != null && _message.ShowLog)
-            {
-                _message.Log("用户:" + name + "，的IP更新为:" + remoteIP);
-            }
-            return ApiCommon.GetSuccess();
         }
         [WebMethod]
         public APIResault GetIP(string args, HttpListenerRequest request)

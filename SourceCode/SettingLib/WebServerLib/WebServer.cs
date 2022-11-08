@@ -197,8 +197,10 @@ namespace WebServerLib
                 if (_message!=null && _message.ShowLog)
                 {
                     string mess = con.Message;
-
-                    _message.Log(mess);
+                    if (!string.IsNullOrWhiteSpace(mess))
+                    {
+                        _message.Log(mess);
+                    }
 
                 }
                 return con;

@@ -51,7 +51,10 @@ namespace FirewallSettingSSHLib
         /// <param name="message"></param>
         public static void LogAuto(string message)
         {
-            
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return;
+            }
             string fileName = Path.Combine(BaseRoot, "auto" + DateTime.Now.ToString("yyyyMMdd") + ".txt");
             lock (_autoLock)
             {
@@ -73,7 +76,10 @@ namespace FirewallSettingSSHLib
         /// <param name="message"></param>
         public static void LogMessage(string message)
         {
-            
+            if (string.IsNullOrWhiteSpace(message)) 
+            {
+                return;
+            }
             string name = "log." + DateTime.Now.ToString("yyyyMMdd") + ".txt";
             string fileName = Path.Combine(BaseRoot, name);
             lock (_messLock)
@@ -98,7 +104,10 @@ namespace FirewallSettingSSHLib
         /// <param name="message"></param>
         public static void LogWarning(string message)
         {
-            
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return;
+            }
             string name = "warning." + DateTime.Now.ToString("yyyyMMdd") + ".txt";
             string fileName = Path.Combine(BaseRoot, name);
             lock (_warningLock)
