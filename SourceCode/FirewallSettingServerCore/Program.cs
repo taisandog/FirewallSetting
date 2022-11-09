@@ -61,6 +61,7 @@ namespace FirewallSettingServerCore
             string version = typeof(Program).Assembly.GetName().Version.ToString();
             Console.WriteLine("Version:" + version);
             Console.WriteLine("FirewallType:"+ _userMan.FWHandle.Name);
+            Console.WriteLine("OS:" + AppConfig.OS.Name);
             Console.WriteLine("Log:" + ApplicationLog.BaseRoot);  
             FWUser.IsServer = true;
             try

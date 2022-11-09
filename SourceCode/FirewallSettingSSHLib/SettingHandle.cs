@@ -105,7 +105,7 @@ namespace SettingLib
         private const int BlockTimes = 5;
         private const int PacketTimeout = 30;
         private static readonly string PackIDHead = "pk.";
-        private static readonly bool ForceV2 = AppSetting.Default["App.ForceV2"] == "1";
+        
         [WebMethod]
         public APIResault UpdateAddress(string args, HttpListenerRequest request)
         {
@@ -144,7 +144,7 @@ namespace SettingLib
                 string cursign = null;
                 if (!isV2)
                 {
-                    if (ForceV2)
+                    if (AppConfig.ForceV2)
                     {
                         return ApiCommon.GetFault("本程序强制用V2验证");
                     }

@@ -1,4 +1,5 @@
 ﻿using Buffalo.Kernel;
+using FirewallSettingSSHLib;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -296,11 +297,7 @@ namespace SettingLib
             nitem.UpdateDate = now;
         }
 
-        public static readonly string ServerName = AppSetting.Default["Server.Name"];
-
-        public static readonly string ServerUrl = AppSetting.Default["Server.URL"];
-
-        public static readonly int ServerKey = AppSetting.Default["Server.ServerKey"].ConvertTo<int>(3);
+        
         /// <summary>
         /// 创建新的密钥
         /// </summary>
@@ -308,7 +305,7 @@ namespace SettingLib
         public static string CreateSecret()
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < ServerKey; i++)
+            for (int i = 0; i < AppConfig.ServerKey; i++)
             {
                 Guid id = Guid.NewGuid();
                 byte[] arr = id.ToByteArray();
@@ -409,7 +406,7 @@ namespace SettingLib
                 XmlAttribute att = doc.CreateAttribute("name");
                 if (IsServer)
                 {
-                    att.InnerText = ServerName;
+                    att.InnerText = AppConfig.ServerName;
                 }
                 else
                 {
@@ -422,7 +419,7 @@ namespace SettingLib
                 att = doc.CreateAttribute("url");
                 if (IsServer)
                 {
-                    att.InnerText = ServerUrl;
+                    att.InnerText = AppConfig.ServerUrl;
                 }
                 else
                 {
@@ -465,7 +462,7 @@ namespace SettingLib
             if (IsServer)
             {
                 
-                dic["Name"] = ServerName;
+                dic["Name"] = AppConfig.ServerName;
             }
             else
             {
@@ -474,7 +471,7 @@ namespace SettingLib
             if (IsServer)
             {
                
-                dic["Url"] = ServerUrl;
+                dic["Url"] = AppConfig.ServerUrl;
             }
             else
             {

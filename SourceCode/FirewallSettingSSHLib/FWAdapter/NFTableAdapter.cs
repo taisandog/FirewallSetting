@@ -30,12 +30,12 @@ namespace FirewallSettingSSHLib.FWAdapter
 
         private static string GetNFTableName()
         {
-            string name = AppSetting.Default["App.NFTableName"];
-            if (string.IsNullOrWhiteSpace(name))
+            
+            if (string.IsNullOrWhiteSpace(AppConfig.NFTableName))
             {
                 return Firewalld;
             }
-            return name;
+            return AppConfig.NFTableName;
         }
 
 
@@ -46,7 +46,7 @@ namespace FirewallSettingSSHLib.FWAdapter
 
         private static string GetNFTableChain() 
         {
-            string chain = AppSetting.Default["App.NFChain"];
+            string chain = AppConfig.NFChain;
             if (string.IsNullOrWhiteSpace(chain) )
             {
                 return "filter_IN_public_allow";
@@ -80,8 +80,11 @@ namespace FirewallSettingSSHLib.FWAdapter
         public override bool InitSetting(SshClient ssh)
         {
             //CheckTable(ssh);
-            CheckIPSet(ssh, IPSetName,false);
-            CheckIPSet(ssh, IPSetNameV6, true);
+            CheckIPSet(ssh, AppConfig.IPSetName,false);
+            if (AppConfig.UseIPv6)
+            {
+                CheckIPSet(ssh, IPSetNameV6, true);
+            }
             SshCommand cmd = RunCommand(ssh, "nft list ruleset > /etc/nftables.conf");
             ApplicationLog.LogCmdError(cmd);
             return true;
@@ -279,8 +282,11 @@ namespace FirewallSettingSSHLib.FWAdapter
             Dictionary<string, FirewallRule> dicExistsRule = LoadExistsRule(ssh);
             List<string> lstIP = LoadUserIP();
             Dictionary<string, bool> existsIP = new Dictionary<string, bool>();
-            FillExistsIP(ssh,IPSetName, existsIP);
-            FillExistsIP(ssh, IPSetNameV6, existsIP);
+            FillExistsIP(ssh, AppConfig.IPSetName, existsIP);
+            if (AppConfig.UseIPv6)
+            {
+                FillExistsIP(ssh, IPSetNameV6, existsIP);
+            }
             List<FirewallRule> lstCreateItem = new List<FirewallRule>();//需要创建的列表
             FirewallRule rule = null;
 
@@ -304,7 +310,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             //更新规则
             foreach (FirewallItem fwItem in _firewallRule)
             {
-                string key = GetKey(IPSetName, fwItem.Port, fwItem.Protocol);
+                string key = GetKey(AppConfig.IPSetName, fwItem.Port, fwItem.Protocol);
                 if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
                 {
                     dicExistsRule.Remove(key);
@@ -313,21 +319,23 @@ namespace FirewallSettingSSHLib.FWAdapter
                 else
                 {
                     //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
-                    rule = new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol);
+                    rule = new FirewallRule(AppConfig.IPSetName, fwItem.Port, fwItem.Protocol);
                     cmd.Add(CreateAddCommand(rule));//增加白名单命令
                 }
 
-
-                key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
-                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                if (AppConfig.UseIPv6)
                 {
-                    dicExistsRule.Remove(key);
-                }
-                else
-                {
-                    //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
-                    rule = new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol);
-                    cmd.Add(CreateAddCommand(rule));//增加白名单命令
+                    key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
+                    if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                    {
+                        dicExistsRule.Remove(key);
+                    }
+                    else
+                    {
+                        //lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
+                        rule = new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol);
+                        cmd.Add(CreateAddCommand(rule));//增加白名单命令
+                    }
                 }
             }
 
@@ -344,7 +352,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private string CreateAddIPCommand(string ip)
         {
-            string ipSet = IPSetName;
+            string ipSet = AppConfig.IPSetName;
             if (IsIPV6(ip))
             {
                 ipSet = IPSetNameV6;
@@ -366,7 +374,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private string CreateDeleteIPCommand(string ip)
         {
-            string ipSet = IPSetName;
+            string ipSet = AppConfig.IPSetName;
             if (IsIPV6(ip))
             {
                 ipSet = IPSetNameV6;

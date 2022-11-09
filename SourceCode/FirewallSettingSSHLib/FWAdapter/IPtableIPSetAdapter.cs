@@ -1,4 +1,5 @@
-﻿using Renci.SshNet;
+﻿using FirewallSettingSSHLib.OSAdapter;
+using Renci.SshNet;
 using SettingLib;
 using System;
 using System.Collections.Generic;
@@ -69,9 +70,44 @@ namespace FirewallSettingSSHLib.FWAdapter
         public override bool InitSetting(SshClient ssh)
         {
             CheckIPSetInstall(ssh);
-            CheckIPSet(ssh, IPSetName, false);
-            CheckIPSet(ssh, IPSetNameV6, true);
+            CheckIPSet(ssh, AppConfig.IPSetName, false);
+            if (AppConfig.UseIPv6)
+            {
+                CheckIPSet(ssh, IPSetNameV6, true);
+            }
+            IPtablesRestore(ssh);
             return true;
+        }
+
+        /// <summary>
+        /// 恢复之前的规则
+        /// </summary>
+        /// <param name="ssh"></param>
+        private void IPtablesRestore(SshClient ssh)
+        {
+            SshCommand cmd = null;
+            string insCmd = AppConfig.OS.GetIPtablesRestoreCommand(false);
+            if (!string.IsNullOrWhiteSpace(insCmd))
+            {
+                cmd = RunCommand(ssh, insCmd);
+                if (!IsSuccess(cmd))
+                {
+                    Console.WriteLine(cmd.Error);
+                }
+            }
+            if (AppConfig.UseIPv6)
+            {
+                insCmd = AppConfig.OS.GetIPtablesRestoreCommand(true);
+                if (!string.IsNullOrWhiteSpace(insCmd))
+                {
+                    cmd = RunCommand(ssh, insCmd);
+                    if (!IsSuccess(cmd))
+                    {
+                        Console.WriteLine(cmd.Error);
+                    }
+                   
+                }
+            }
         }
 
         private void CheckIPSetInstall(SshClient ssh)
@@ -84,7 +120,8 @@ namespace FirewallSettingSSHLib.FWAdapter
             if (cmd.Error.Contains("ipset: command not found", StringComparison.CurrentCultureIgnoreCase))
             {
                 Console.WriteLine("正在安装ipset");
-                cmd = RunCommand(ssh, "apt-get -y install ipset libipset-dev");
+                string insCmd = AppConfig.OS.GetInstallCommand("ipset libipset-dev");
+                cmd = RunCommand(ssh, insCmd);
                 if (IsSuccess(cmd))
                 {
                     Console.WriteLine("安装ipset完毕");
@@ -114,7 +151,7 @@ namespace FirewallSettingSSHLib.FWAdapter
 
             SshCommand cmd = RunCommand(ssh, "iptables -nvL INPUT --line-number");//查看当前规则
             string res = cmd.Result;
-            ipHead = "! match-set " + IPSetName;
+            ipHead = "! match-set " + AppConfig.IPSetName;
 
             using (StringReader reader = new StringReader(res))
             {
@@ -131,31 +168,35 @@ namespace FirewallSettingSSHLib.FWAdapter
                     {
                         continue;
                     }
-                    FillRule(line, IPSetName, numHeadIndex, protHeadIndex, dicExists, repeatListNumber);
+                    FillRule(line, AppConfig.IPSetName, numHeadIndex, protHeadIndex, dicExists, repeatListNumber);
                 }
             }
 
-            cmd = RunCommand(ssh, "ip6tables -nvL INPUT --line-number");//查看当前规则
-            res = cmd.Result;
-            ipHead = "! match-set " + IPSetNameV6;
-            numHeadIndex = -1;
-            protHeadIndex = -1;
-            using (StringReader reader = new StringReader(res))
-            {
-                while ((line = reader.ReadLine()) != null)
-                {
 
-                    if (numHeadIndex < 0)
+            if (AppConfig.UseIPv6)
+            {
+                cmd = RunCommand(ssh, "ip6tables -nvL INPUT --line-number");//查看当前规则
+                res = cmd.Result;
+                ipHead = "! match-set " + IPSetNameV6;
+                numHeadIndex = -1;
+                protHeadIndex = -1;
+                using (StringReader reader = new StringReader(res))
+                {
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
-                        protHeadIndex = line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
-                        continue;
+
+                        if (numHeadIndex < 0)
+                        {
+                            numHeadIndex = line.IndexOf("num ", StringComparison.CurrentCultureIgnoreCase);
+                            protHeadIndex = line.IndexOf("prot ", StringComparison.CurrentCultureIgnoreCase);
+                            continue;
+                        }
+                        if (line.IndexOf(ipHead) <= 0)
+                        {
+                            continue;
+                        }
+                        FillRule(line, IPSetNameV6, numHeadIndex, protHeadIndex, dicExists, repeatListNumber);
                     }
-                    if (line.IndexOf(ipHead) <= 0)
-                    {
-                        continue;
-                    }
-                    FillRule(line, IPSetNameV6, numHeadIndex, protHeadIndex, dicExists, repeatListNumber);
                 }
             }
 
@@ -280,8 +321,14 @@ namespace FirewallSettingSSHLib.FWAdapter
                 res = RunCommand(ssh, command);
                 ApplicationLog.LogCmdError(res);
             }
-            res = RunCommand(ssh, "service iptables save");
-            res = RunCommand(ssh, "service ip6tables save");
+
+            string saveCmd = AppConfig.OS.GetIPtablesSaveCommand(false);
+            res = RunCommand(ssh, saveCmd);
+            if (AppConfig.UseIPv6)
+            {
+                saveCmd = AppConfig.OS.GetIPtablesSaveCommand(true);
+                res = RunCommand(ssh, saveCmd);
+            }
             ApplicationLog.LogCmdError(res);
         }
 
@@ -395,7 +442,7 @@ namespace FirewallSettingSSHLib.FWAdapter
 
             foreach (FirewallItem fwItem in _firewallRule)
             {
-                string key = GetKey(IPSetName, fwItem.Port, fwItem.Protocol);
+                string key = GetKey(AppConfig.IPSetName, fwItem.Port, fwItem.Protocol);
                 if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
                 {
                     dicExistsRule.Remove(key);
@@ -403,18 +450,20 @@ namespace FirewallSettingSSHLib.FWAdapter
                 }
                 else
                 {
-                    lstCreateItem.Add(new FirewallRule(IPSetName, fwItem.Port, fwItem.Protocol));
+                    lstCreateItem.Add(new FirewallRule(AppConfig.IPSetName, fwItem.Port, fwItem.Protocol));
                 }
 
-
-                key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
-                if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                if (AppConfig.UseIPv6)
                 {
-                    dicExistsRule.Remove(key);
-                }
-                else
-                {
-                    lstCreateItem.Add(new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol));
+                    key = GetKey(IPSetNameV6, fwItem.Port, fwItem.Protocol);
+                    if (dicExistsRule.ContainsKey(key)) //已存在规则，在存在列表删除并跳过
+                    {
+                        dicExistsRule.Remove(key);
+                    }
+                    else
+                    {
+                        lstCreateItem.Add(new FirewallRule(IPSetNameV6, fwItem.Port, fwItem.Protocol));
+                    }
                 }
             }
             FirewallRule rule = null;
@@ -432,8 +481,11 @@ namespace FirewallSettingSSHLib.FWAdapter
         {
             List<string> lstIP = LoadUserIP();
             Dictionary<string, bool> existsIP = new Dictionary<string, bool>();
-            FillExistsIP(ssh, IPSetName, existsIP);
-            FillExistsIP(ssh, IPSetNameV6, existsIP);
+            FillExistsIP(ssh, AppConfig.IPSetName, existsIP);
+            if (AppConfig.UseIPv6)
+            {
+                FillExistsIP(ssh, IPSetNameV6, existsIP);
+            }
             //更新IP
             foreach (string ip in lstIP)
             {
@@ -459,7 +511,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private string CreateAddIPCommand(string ip)
         {
-            string ipSet = IPSetName;
+            string ipSet = AppConfig.IPSetName;
             if (IsIPV6(ip))
             {
                 ipSet = IPSetNameV6;
@@ -478,7 +530,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private string CreateDeleteIPCommand(string ip)
         {
-            string ipSet = IPSetName;
+            string ipSet = AppConfig.IPSetName;
             if (IsIPV6(ip))
             {
                 ipSet = IPSetNameV6;

@@ -20,7 +20,7 @@ namespace FirewallSettingSSHLib
         /// <returns></returns>
         private static string GetBaseRoot()
         {
-            string ret = AppSetting.Default["App.Log"];
+            string ret = AppConfig.AppLog;
             if (string.IsNullOrWhiteSpace(ret)) 
             {
                 ret = CommonMethods.GetBaseRoot("log");

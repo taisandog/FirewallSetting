@@ -1,5 +1,6 @@
 ﻿using Buffalo.ArgCommon;
 using Buffalo.Kernel;
+using FirewallSettingSSHLib;
 using FirewallSettingSSHLib.FWAdapter;
 using Newtonsoft.Json;
 using Renci.SshNet;
@@ -55,12 +56,12 @@ namespace SettingLib
 
         private FWAdapterBase LoadAdapter()
         {
-            string firewallType = AppSetting.Default["Server.FirewallType"];
+            
             using (SshClient ssh = FirewallUnit.CreateSsh())
             {
                 ssh.Connect();
 
-                if (string.Equals(firewallType, "iptables", StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(AppConfig.FirewallType, "iptables", StringComparison.CurrentCultureIgnoreCase))
                 {
                     IPtableIPSetAdapter iptAdp = new IPtableIPSetAdapter();
 
@@ -70,7 +71,7 @@ namespace SettingLib
                     }
 
                 }
-                if (string.Equals(firewallType, "ufw", StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(AppConfig.FirewallType, "ufw", StringComparison.CurrentCultureIgnoreCase))
                 {
                     UFWiptablesAdapter ufwAdp = new UFWiptablesAdapter();
 
@@ -80,7 +81,7 @@ namespace SettingLib
                     }
 
                 }
-                if (string.Equals(firewallType, "firewalld", StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(AppConfig.FirewallType, "firewalld", StringComparison.CurrentCultureIgnoreCase))
                 {
                     FirewalldIPSetAdapter fwAdp = new FirewalldIPSetAdapter();
 
@@ -90,7 +91,7 @@ namespace SettingLib
                     }
 
                 }
-                if (string.Equals(firewallType, "nftable", StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(AppConfig.FirewallType, "nftable", StringComparison.CurrentCultureIgnoreCase))
                 {
                     NFTableAdapter nftAdp = new NFTableAdapter();
                     if (nftAdp.InitSetting(ssh))

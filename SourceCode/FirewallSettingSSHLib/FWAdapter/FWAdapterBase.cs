@@ -1,4 +1,5 @@
 ﻿using Buffalo.Kernel;
+using FirewallSettingSSHLib.OSAdapter;
 using Renci.SshNet;
 using SettingLib;
 using System;
@@ -14,19 +15,12 @@ namespace FirewallSettingSSHLib.FWAdapter
     /// </summary>
     public abstract class FWAdapterBase
     {
+        
 
-        private string _ipsetName=AppSetting.Default["App.IPSet"]==null? "buffirewallipset" : AppSetting.Default["App.IPSet"];
-        /// <summary>
-        /// 防火墙ip集名
-        /// </summary>
-        public string IPSetName
-        {
-            get
-            {
-                return _ipsetName;
-            }
-            
-        }
+
+       
+
+
 
         private string _ipsetNameV6;
         /// <summary>
@@ -38,7 +32,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 if (_ipsetNameV6 == null) 
                 {
-                    _ipsetNameV6 = _ipsetName + ".v6";
+                    _ipsetNameV6 = AppConfig.IPSetName + ".v6";
                 }
                 return _ipsetNameV6;
             }
@@ -87,10 +81,7 @@ namespace FirewallSettingSSHLib.FWAdapter
                 _allUser = value;
             }
         }
-        /// <summary>
-        /// 是否使用sudo执行命令
-        /// </summary>
-        private bool _useSudo = AppSetting.Default["App.UseSudo"] =="1";
+        
         /// <summary>
         /// 运行命令
         /// </summary>
@@ -99,7 +90,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         public SshCommand RunCommand(SshClient ssh,string cmd) 
         {
             SshCommand ret = null;
-            if (_useSudo)
+            if (AppConfig.UseSudo)
             {
                 StringBuilder sb = new StringBuilder();
                 if (!string.IsNullOrWhiteSpace(FirewallUnit.UserPassword))
@@ -164,14 +155,13 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public virtual List<string> LoadUserIP()
         {
-            string lanIPs = AppSetting.Default["Server.AllowIP"];
             Dictionary<string, bool> dicExists = new Dictionary<string, bool>();
             List<string> lstIP = new List<string>(_allUser.Count);
             List<string> cur = null;
             string curIP = null;
-            if (!string.IsNullOrWhiteSpace(lanIPs))
+            if (!string.IsNullOrWhiteSpace(AppConfig.LanIPs))
             {
-                string[] lanIPArr = lanIPs.Split(',');
+                string[] lanIPArr = AppConfig.LanIPs.Split(',');
                 foreach (string lanIP in lanIPArr)
                 {
                     if (string.IsNullOrWhiteSpace(lanIP))
