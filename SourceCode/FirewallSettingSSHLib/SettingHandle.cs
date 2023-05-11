@@ -101,7 +101,7 @@ namespace SettingLib
 
         private static readonly string KeyHead = "App.BkIP_";
         private static readonly string KeyCntHead = "App.CntIP_";
-        private const int BlockSecond = 60 * 5;
+        private static readonly TimeSpan BlockSecond = TimeSpan.FromSeconds(60 * 5);
         private const int BlockTimes = 5;
         private const int PacketTimeout = 30;
         private static readonly string PackIDHead = "pk.";
@@ -204,7 +204,7 @@ namespace SettingLib
         {
             
             long bTick = _cache.GetValue<long>(blockkey);
-            if (curTick - bTick < BlockSecond)
+            if (curTick - bTick < BlockSecond.TotalSeconds)
             {
                 return ApiCommon.GetFault(remoteIP + "，被写入黑名单");
             }
@@ -233,7 +233,7 @@ namespace SettingLib
             sbKey.Append(".");
             sbKey.Append(curTick.ToString("X"));
             string key = sbKey.ToString();
-            bool isSet = _cache.SetValue<int>(key, 1, SetValueType.AddNew,30);
+            bool isSet = _cache.SetValue<int>(key, 1, SetValueType.AddNew,TimeSpan.FromSeconds(30));
             if (!isSet)
             {
                 return ApiCommon.GetFault("重复请求");

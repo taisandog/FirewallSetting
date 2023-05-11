@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TreadPoolManager\**" />
+    <EmbeddedResource Remove="TreadPoolManager\**" />
+    <None Remove="TreadPoolManager\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Buffalo.ArgCommon" Version="1.2.0" />
     <PackageReference Include="Buffalo.Kernel" Version="1.2.5" />
     <PackageReference Include="Buffalo.QueryCache" Version="1.4.1" />
