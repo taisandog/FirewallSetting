@@ -1,0 +1,343 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "FWSetting客户端";
+}
+@section Header
+{
+
+    <script src="~/js/mainpanelaction.js"></script>
+    <script src="~/js/jsonsign.js"></script>
+    <script src="~/js/sha1.js"></script>
+    <style type="text/css">
+        body {
+           
+        }
+        .styServers
+        {
+            width:90%;
+            border-width:1px;
+            border-style:solid;
+            border-color: lightgray;
+            margin: auto
+        }
+        .styServerHead
+        {
+            font-size:14pt;
+            font-weight:bold;
+            border-bottom-width: 1px;
+            border-style: solid;
+            border-color:lightgray;
+            background-color:dodgerblue;
+            color:white
+        }
+        .styBtn
+        {
+            color: #fff;
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+            width:90%;
+            margin-top: 10px;
+            border-radius:10px
+        }
+
+        .stybtnTable {
+            width: 90%;
+            margin: auto;
+            margin-bottom:10px
+        }
+
+        .pageTitle
+        {
+            color: rgb(255, 255, 255);
+            font-size: 16px;
+            font-weight: bolder;
+            text-align: center;
+            background-color: rgb(0,162,233)
+        }
+
+        .childdiv {
+            border-bottom-color: #828282;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+            padding-left: 10px;
+        }
+
+        .messageBox {
+            width: 90%;
+            margin: auto;
+            border-width:1px; 
+            border-style:solid;
+            margin-top:50px;
+            min-height:150px
+        }
+        .styMessage
+        {
+            text-align: left;
+        }
+        .styDeleteTD
+        {
+            width:50px;
+            border-left-color: #828282;
+            border-left-width: 1px;
+            border-left-style: solid;
+            
+        }
+
+        .styControl {
+            margin: auto; border-color: #828282;
+            border-width: 1px;
+            border-style: solid;
+            margin-top:10px;
+            width: 90%;
+        }
+
+        .styControlHead {
+            font-size: 14pt;
+            font-weight: bold;
+            border-width: 0px;
+            color: white;
+            background-color: rgb(0,162,233)
+        }
+    </style>
+
+    <script type="text/javascript">
+        var _lstServers=null;
+        var mbDisplay = null;
+        var _serid=0;
+        var _lastUpdate=0;
+        var _actionTimer = null;
+        function htmlEncode(value) {
+            return $('<div/>').text(value).html();
+        }
+
+        $(document).ready(function () {
+            loadConfig();
+            mbDisplay = $("#divDisplay");
+            checkUpdate();
+        });
+        function loadConfig()
+        {
+            var strServer=window.localStorage.getItem("fwservers");
+            if(strServer==null || strServer=="")
+            {
+                _lstServers = [];
+                return;
+            }
+            _lstServers = JSON.parse(strServer);
+            for (var i = 0; i < _lstServers.length; i++) {
+                _lstServers[i].id = _serid;
+                _serid++;
+            }
+
+            bindServers();
+        }
+        
+
+        function bindServers()
+        {
+            var html = "<tr class=\"styServerHead\"><td>服务器</td><td class=\"styDeleteTD\"></td></tr>";
+            var curServer=null;
+            for (var i = 0; i < _lstServers.length;i++)
+            {
+                curServer = _lstServers[i];
+                html += ("<tr><td>" + htmlEncode(curServer.Name) + "</td><td class=\"styDeleteTD\"><a href=\"javascript:doDelete(" + curServer.id + ")\">删除</a></td></tr>");
+            }
+            $("#tabServers").html(html);
+        }
+        function doDelete(id)
+        {
+            
+            var needDelete=-1;
+            for (var i = _lstServers.length-1; i >=0; i--) {
+                if (_lstServers[i].id == id) {
+                    needDelete=i;
+                }
+            }
+
+            if (needDelete<0)
+            {
+                return;
+            }
+            if (confirm("是否需要删除" + _lstServers[needDelete].Name + "的配置?")) {
+
+                _lstServers.splice(needDelete, 1);
+            }
+            saveServers();
+            bindServers();
+        }
+        function addConfig()
+        {
+            try {
+                var json = $("#txtShowJson").val();
+                if(json==null || json=="")
+                {
+                    displayMessage("请输入配置码",2);
+                    return;
+                }
+                var serInfo=JSON.parse(json);
+                serInfo.id = _serid;
+                _serid++;
+                _lstServers.push(serInfo);
+                saveServers();
+                bindServers();
+                $("#txtShowJson").val("");
+            }catch (e) {
+                displayMessage(e,3);
+            }
+        }
+
+        function saveServers()
+        {
+            var json = JSON.stringify(_lstServers);
+            window.localStorage.setItem("fwservers", json);
+        }
+        function updateNow() {
+            _lastUpdate=0;
+
+        }
+
+        function updateIP()
+        {
+            for (var i = 0; i < _lstServers.length; i++) {
+                doUpdate(_lstServers[i]);
+            }
+           
+        }
+        function doUpdate(curServer)
+        {
+            var curl = getUrl(curServer, "GetIP");
+            //displayMessage(curl,1);
+            $.ajax({
+                method: 'POST',
+                url: curl,
+                dataType: 'text',
+                success: function (e) 
+                {
+                    
+                    var obj=JSON.parse(e);
+                    if (obj.state != 1) {
+                        displayMessage(obj.message, 3);
+                        return;
+                    }
+                    var ip = obj.data;
+
+                    doUpdateIP(curServer, ip);
+                },
+                error: function (e) 
+                {
+
+                    displayMessage(JSON.stringify(e), 3);
+                }
+            });
+        }
+
+        function doUpdateIP(curServer,ip) {
+
+            var curl = getUrl(curServer, "UpdateAddress");
+           
+            var ctick = Math.round(new Date().getTime() / 1000);
+            
+            var cname = curServer.UserName;
+            var csign = signValue(cname, curServer.Secret, ctick, ip);
+            
+
+            var postData=
+            {
+                Tick: ctick,
+                Name: cname,
+                Sign: csign,
+                V2:"1"
+            }
+            var dataJson = JSON.stringify(postData);
+            //displayMessage(dataJson, 1);
+
+
+            $.ajax({
+                method: 'POST',
+                url: curl,
+                dataType: 'text',
+                data: dataJson,
+                success: function (e) {
+                    var obj = JSON.parse(e);
+                    if (obj.state != 1) {
+                        displayMessage(obj.message, 3);
+                        return;
+                    }
+                    displayMessage(curServer.Name + ",更新IP完毕", 1);
+
+                },
+                error: function (e) {
+                    displayMessage(JSON.stringify(e), 3);
+                }
+            });
+        }
+
+        function getUrl(curServer,methodName)
+        {
+            var url = curServer.Url;
+            if(!url.endsWith("/"))
+            {
+                url += "/";
+            }
+            url += "Setting?MethodName=";
+            url += methodName;
+            return url;
+        }
+        
+        function checkUpdate()
+        {
+            var ctick = (new Date().getTime());
+            if (ctick > _lastUpdate + 60000) {
+                try
+                {
+                    updateIP();
+                    _lastUpdate = ctick;
+                }
+                catch(e)
+                {
+                    displayMessage(e, 3);
+                }
+            }
+            _actionTimer = setTimeout(checkUpdate, 1000);
+        }
+    </script>
+}
+<div class="text-center">
+    <table id="tabServers" class="styServers">
+        <tr class="styServerHead">
+            
+        </tr>
+
+    </table>
+
+
+    <div class="styControl" >
+        <div class="styControlHead">
+            操作配置
+        </div>
+    <div id="divLoginJson" style="margin-top:10px">
+        <textarea id="txtShowJson" name="txtShowJson" style="width:90%;height:100px" placeholder="配置码"></textarea>
+    </div>
+
+    <table  class="stybtnTable">
+        <tr>
+            <td> <input name="btnLogin" class="styBtn" value="添加服务" type="button" onclick="addConfig()" /></td>
+            <td> <input name="btnLogin" class="styBtn" value="手动同步" type="button" onclick="updateNow()" /></td>
+        </tr>
+
+    </table>
+    </div>
+
+
+    <div class="messageBox" >
+        <div class="pageTitle">消息</div>
+        <div id="divDisplay" class="styMessage">
+        </div>
+    </div>
+</div>
+@section Footer
+{
+
+
+}

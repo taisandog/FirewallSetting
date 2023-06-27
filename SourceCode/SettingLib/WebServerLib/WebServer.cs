@@ -239,6 +239,11 @@ namespace WebServerLib
                 //设置响应头部内容，长度及编码
                 response.ContentLength64 = System.Text.Encoding.UTF8.GetByteCount(responseBody);
                 response.ContentType = "application/json; Charset=UTF-8";
+                response.Headers["Access-Control-Allow-Origin"] = "*";
+                response.Headers["Access-Control-Allow-Methods"] = "POST,GET,PUT,DELETE";
+                response.Headers["Access-Control-Max-Age"] = "3600";
+                response.Headers["Access-Control-Allow-Headers"] = "*";
+                response.Headers["Access-Control-Allow-Credentials"] = "true";
                 using (StreamWriter sw = new StreamWriter(response.OutputStream))
                 {
                     sw.Write(responseBody);
