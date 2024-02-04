@@ -8,6 +8,8 @@ using Renci.SshNet;
 using SettingLib;
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
+using System.Text;
 using System.Threading;
 using System.Xml;
 using WebServerLib;
@@ -62,7 +64,11 @@ namespace FirewallSettingServerCore
             Console.WriteLine("Version:" + version);
             Console.WriteLine("FirewallType:"+ _userMan.FWHandle.Name);
             Console.WriteLine("OS:" + AppConfig.OS.Name);
-            Console.WriteLine("Log:" + ApplicationLog.BaseRoot);  
+            Console.WriteLine("Log:" + ApplicationLog.BaseRoot);
+            
+
+            
+
             FWUser.IsServer = true;
             try
             {
@@ -276,22 +282,33 @@ namespace FirewallSettingServerCore
             if (string.IsNullOrWhiteSpace(conUrl))
             {
 
-                ApplicationLog.LogError("Server.Listen不能为空");
+                ApplicationLog.LogError("Server.Listen must br not null");
                 return false;
             }
             string[] urls = conUrl.Split(';');
             _server.ListeneAddress = urls;
             SettingHandle handle = new SettingHandle();
+            WebHandle whandle = new WebHandle();
             handle.UserMan = _userMan;
             handle.Form = my;
             handle.Message = my;
             _server.OnException += _authServices_OnException;
             _server.UrlMap["Setting"] = handle;
-
+            _server.UrlMap["Web"] = whandle;
             _server.StartServer();
        
             Console.WriteLine("Start finish,listen Url:" + conUrl);
 
+            StringBuilder sb = new StringBuilder();
+            string tmp = null;
+            foreach (string url in urls)
+            {
+                tmp = url.TrimEnd('/', ' ');
+                tmp = tmp.Replace("//+:", "//[Your IP]:");
+                sb.Append(tmp);
+                sb.Append("/web/index.html;");
+            }
+            Console.WriteLine("WebClient:" + sb.ToString());
             return true;
         }
 

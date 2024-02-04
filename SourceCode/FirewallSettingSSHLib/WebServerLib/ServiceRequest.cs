@@ -25,6 +25,7 @@ namespace WebServerLib
         private string _body;
 
         private string _methodName;
+        private string _page;
         /// <summary>
         /// 内容
         /// </summary>
@@ -69,6 +70,17 @@ namespace WebServerLib
             }
         }
         /// <summary>
+        /// 访问页面
+        /// </summary>
+        public string Page
+        {
+            get
+            {
+                return _page;
+            }
+
+        }
+        /// <summary>
         /// 获取Arg的信息
         /// </summary>
         /// <returns></returns>
@@ -98,6 +110,23 @@ namespace WebServerLib
             if (string.IsNullOrWhiteSpace(_methodName)) 
             {
                 _methodName = request.QueryString["MethodName"];
+            }
+            if (string.IsNullOrWhiteSpace(_methodName))
+            {
+                string url = request.Url.AbsolutePath;
+
+                string[] urlpart = url.Split(new char[] { '/' });
+                if (urlpart.Length > 1)
+                {
+                    _methodName = urlpart[urlpart.Length - 1];
+                    _page = urlpart[urlpart.Length - 2];
+                }
+
+
+            }
+            if (string.IsNullOrWhiteSpace(_page))
+            {
+                _page = request.Url.AbsolutePath;
             }
             _body = ReadBody(request);
             return null;

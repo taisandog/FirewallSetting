@@ -51,10 +51,12 @@
             this.Btn_Connect = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.chkAutoRun = new System.Windows.Forms.CheckBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.iconMenu = new System.Windows.Forms.NotifyIcon(this.components);
             this.mbDisplay = new Library.MessageBox();
-            this.chkAutoRun = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtClient = new System.Windows.Forms.TextBox();
             this.gbMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgMembers)).BeginInit();
             this.cmUser.SuspendLayout();
@@ -72,7 +74,7 @@
             this.gbMain.Dock = System.Windows.Forms.DockStyle.Top;
             this.gbMain.Location = new System.Drawing.Point(0, 0);
             this.gbMain.Name = "gbMain";
-            this.gbMain.Size = new System.Drawing.Size(960, 306);
+            this.gbMain.Size = new System.Drawing.Size(956, 300);
             this.gbMain.TabIndex = 1;
             this.gbMain.TabStop = false;
             this.gbMain.Text = "信息";
@@ -96,7 +98,7 @@
             this.dgMembers.RowHeadersVisible = false;
             this.dgMembers.RowTemplate.Height = 23;
             this.dgMembers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgMembers.Size = new System.Drawing.Size(761, 222);
+            this.dgMembers.Size = new System.Drawing.Size(757, 204);
             this.dgMembers.TabIndex = 1;
             // 
             // ColUserName
@@ -179,9 +181,9 @@
             // 
             this.groupBox1.Controls.Add(this.dgRules);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.groupBox1.Location = new System.Drawing.Point(764, 25);
+            this.groupBox1.Location = new System.Drawing.Point(760, 25);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(193, 222);
+            this.groupBox1.Size = new System.Drawing.Size(193, 204);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "已加载规则";
@@ -205,7 +207,7 @@
             this.dgRules.RowHeadersVisible = false;
             this.dgRules.RowTemplate.Height = 23;
             this.dgRules.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgRules.Size = new System.Drawing.Size(187, 194);
+            this.dgRules.Size = new System.Drawing.Size(187, 176);
             this.dgRules.TabIndex = 2;
             // 
             // dataGridViewTextBoxColumn1
@@ -231,17 +233,17 @@
             this.panel1.Controls.Add(this.button2);
             this.panel1.Controls.Add(this.panel2);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(3, 247);
+            this.panel1.Location = new System.Drawing.Point(3, 229);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(954, 56);
+            this.panel1.Size = new System.Drawing.Size(950, 68);
             this.panel1.TabIndex = 0;
             // 
             // Btn_Disconnect
             // 
             this.Btn_Disconnect.Enabled = false;
-            this.Btn_Disconnect.Location = new System.Drawing.Point(507, 11);
+            this.Btn_Disconnect.Location = new System.Drawing.Point(507, 6);
             this.Btn_Disconnect.Name = "Btn_Disconnect";
-            this.Btn_Disconnect.Size = new System.Drawing.Size(113, 30);
+            this.Btn_Disconnect.Size = new System.Drawing.Size(113, 47);
             this.Btn_Disconnect.TabIndex = 13;
             this.Btn_Disconnect.Text = "停止服务器";
             this.Btn_Disconnect.UseVisualStyleBackColor = true;
@@ -249,9 +251,9 @@
             // 
             // Btn_Connect
             // 
-            this.Btn_Connect.Location = new System.Drawing.Point(388, 11);
+            this.Btn_Connect.Location = new System.Drawing.Point(388, 6);
             this.Btn_Connect.Name = "Btn_Connect";
-            this.Btn_Connect.Size = new System.Drawing.Size(113, 30);
+            this.Btn_Connect.Size = new System.Drawing.Size(113, 47);
             this.Btn_Connect.TabIndex = 12;
             this.Btn_Connect.Text = "启动服务器";
             this.Btn_Connect.UseVisualStyleBackColor = true;
@@ -269,17 +271,30 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.txtClient);
+            this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.chkAutoRun);
             this.panel2.Controls.Add(this.btnSave);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel2.Location = new System.Drawing.Point(627, 0);
+            this.panel2.Location = new System.Drawing.Point(632, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(327, 56);
+            this.panel2.Size = new System.Drawing.Size(318, 68);
             this.panel2.TabIndex = 1;
+            // 
+            // chkAutoRun
+            // 
+            this.chkAutoRun.AutoSize = true;
+            this.chkAutoRun.Location = new System.Drawing.Point(216, 4);
+            this.chkAutoRun.Name = "chkAutoRun";
+            this.chkAutoRun.Size = new System.Drawing.Size(93, 25);
+            this.chkAutoRun.TabIndex = 1;
+            this.chkAutoRun.Text = "开机启动";
+            this.chkAutoRun.UseVisualStyleBackColor = true;
+            this.chkAutoRun.Click += new System.EventHandler(this.chkAutoRun_Click);
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(3, 11);
+            this.btnSave.Location = new System.Drawing.Point(71, 3);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(97, 30);
             this.btnSave.TabIndex = 0;
@@ -298,30 +313,37 @@
             // 
             this.mbDisplay.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mbDisplay.Font = new System.Drawing.Font("宋体", 10F);
-            this.mbDisplay.Location = new System.Drawing.Point(0, 306);
+            this.mbDisplay.Location = new System.Drawing.Point(0, 300);
             this.mbDisplay.Name = "mbDisplay";
             this.mbDisplay.ShowError = true;
             this.mbDisplay.ShowLog = true;
             this.mbDisplay.ShowWarning = true;
-            this.mbDisplay.Size = new System.Drawing.Size(960, 238);
+            this.mbDisplay.Size = new System.Drawing.Size(956, 244);
             this.mbDisplay.TabIndex = 0;
             // 
-            // chkAutoRun
+            // label1
             // 
-            this.chkAutoRun.AutoSize = true;
-            this.chkAutoRun.Location = new System.Drawing.Point(208, 15);
-            this.chkAutoRun.Name = "chkAutoRun";
-            this.chkAutoRun.Size = new System.Drawing.Size(93, 25);
-            this.chkAutoRun.TabIndex = 1;
-            this.chkAutoRun.Text = "开机启动";
-            this.chkAutoRun.UseVisualStyleBackColor = true;
-            this.chkAutoRun.Click += new System.EventHandler(this.chkAutoRun_Click);
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 38);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(62, 21);
+            this.label1.TabIndex = 14;
+            this.label1.Text = "客户端:";
+            // 
+            // txtClient
+            // 
+            this.txtClient.BackColor = System.Drawing.Color.White;
+            this.txtClient.Location = new System.Drawing.Point(71, 35);
+            this.txtClient.Name = "txtClient";
+            this.txtClient.ReadOnly = true;
+            this.txtClient.Size = new System.Drawing.Size(238, 29);
+            this.txtClient.TabIndex = 15;
             // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(960, 544);
+            this.ClientSize = new System.Drawing.Size(956, 544);
             this.Controls.Add(this.mbDisplay);
             this.Controls.Add(this.gbMain);
             this.Font = new System.Drawing.Font("微软雅黑", 12F);
@@ -372,6 +394,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColNumber;
         private System.Windows.Forms.CheckBox chkAutoRun;
+        private System.Windows.Forms.TextBox txtClient;
+        private System.Windows.Forms.Label label1;
     }
 }
 

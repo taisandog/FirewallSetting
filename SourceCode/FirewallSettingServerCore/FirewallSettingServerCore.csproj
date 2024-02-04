@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <Version>2.2.13</Version>
+    <Version>2.3.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +18,12 @@
   <ItemGroup>
     <None Remove="App_Data\firewallRule.xml" />
     <None Remove="App_Data\userInfo.xml" />
+    <None Remove="App_Data\web\index.html" />
+    <None Remove="App_Data\web\jquery.min.js" />
+    <None Remove="App_Data\web\jquery.min.map" />
+    <None Remove="App_Data\web\jsonSign.js" />
+    <None Remove="App_Data\web\mainpanelaction.js" />
+    <None Remove="App_Data\web\sha1.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +32,24 @@
     </Content>
     <Content Include="App_Data\userInfo.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\web\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\web\jquery.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\web\jquery.min.map">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\web\jsonSign.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\web\mainpanelaction.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Data\web\sha1.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

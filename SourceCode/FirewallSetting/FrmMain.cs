@@ -89,6 +89,7 @@ namespace FirewallSetting
             {
                 Btn_Connect_Click(Btn_Connect,new EventArgs());
             }
+
         }
 
 
@@ -140,6 +141,16 @@ namespace FirewallSetting
             if (ShowLog)
             {
                 Log("服务启动成功，监听地址为:"+ conUrl);
+                StringBuilder sb = new StringBuilder();
+                string tmp = null;
+                foreach (string url in urls) 
+                {
+                    tmp = url.TrimEnd('/', ' ');
+                    tmp = tmp.Replace("//+:", "//[您的服务器IP]:");
+                    sb.Append(tmp);
+                    sb.Append( "/web/index.html;");
+                }
+                txtClient.Text = sb.ToString();
             }
             return true;
         }
@@ -220,6 +231,7 @@ namespace FirewallSetting
             _thdRefreash.StartThread(null);
 
             LogWarning("用户连接监听启动成功");
+            
             Btn_Connect.Enabled = false;
             Btn_Disconnect.Enabled = true;
         }

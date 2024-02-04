@@ -177,7 +177,7 @@ namespace WebServerLib
             req.Load(request);
             string arg = req.GetArgString();
             string method = req.MethodName;
-            string url = request.Url.AbsolutePath;
+            string url = req.Page;
             string ip = LanUnit.GetHostAddress(request);
             
                 
