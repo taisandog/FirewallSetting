@@ -13,6 +13,6 @@ namespace WebServerLib
     /// </summary>
     public interface INetHandle
     {
-        APIResault InvokeMethod(string methodName, string arg, HttpListenerRequest request);
+        APIResault InvokeMethod(string methodName, string arg, HttpListenerRequest request, ref string textHtml);
     }
 }

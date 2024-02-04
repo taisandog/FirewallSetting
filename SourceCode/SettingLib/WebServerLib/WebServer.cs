@@ -139,7 +139,7 @@ namespace WebServerLib
         /// <param name="methodName"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public APIResault RunMethod(string url, string methodName, string args, HttpListenerRequest request)
+        public APIResault RunMethod(string url, string methodName, string args, HttpListenerRequest request, ref string textHtml)
         {
             INetHandle handle = null;
 
@@ -147,7 +147,7 @@ namespace WebServerLib
             {
                 return ApiCommon.GetFault("找不到位置:" + url);
             }
-            return handle.InvokeMethod(methodName, args,request);
+            return handle.InvokeMethod(methodName, args,request,ref textHtml);
         }
         private void DoListen()
         {
@@ -171,7 +171,7 @@ namespace WebServerLib
         /// <summary>
         /// 执行函数
         /// </summary>
-        private APIResault DoMethods(HttpListenerRequest request)
+        private APIResault DoMethods(HttpListenerRequest request, ref string textHtml)
         {
             ServiceRequest req = new ServiceRequest();
             req.Load(request);
@@ -193,7 +193,7 @@ namespace WebServerLib
             try
             {
 
-                APIResault con = RunMethod(url, method, arg, request);
+                APIResault con = RunMethod(url, method, arg, request, ref textHtml);
                 if (_message!=null && _message.ShowLog)
                 {
                     string mess = con.Message;
@@ -225,8 +225,9 @@ namespace WebServerLib
                 {
                     return;
                 }
+                string textHtml = null;
                 HttpListenerRequest request = context.Request;
-                APIResault res = DoMethods(request);
+                APIResault res = DoMethods(request,ref textHtml);
                 
                 //取得响应对象
                 HttpListenerResponse response = context.Response;
@@ -235,15 +236,26 @@ namespace WebServerLib
                 {
                     res = ApiCommon.GetFault("请求错误");
                 }
-                responseBody = res.ToJson();
+                if (res.IsSuccess && !string.IsNullOrWhiteSpace(textHtml))
+                {
+                    response.ContentType = "text/html; Charset=UTF-8";
+                    responseBody = textHtml;
+                }
+                else
+                {
+                    responseBody = res.ToJson();
+                    response.ContentLength64 = System.Text.Encoding.UTF8.GetByteCount(responseBody);
+                    response.ContentType = "application/json; Charset=UTF-8";
+                    
+                }
                 //设置响应头部内容，长度及编码
-                response.ContentLength64 = System.Text.Encoding.UTF8.GetByteCount(responseBody);
-                response.ContentType = "application/json; Charset=UTF-8";
+                
                 response.Headers["Access-Control-Allow-Origin"] = "*";
                 response.Headers["Access-Control-Allow-Methods"] = "POST,GET,PUT,DELETE";
                 response.Headers["Access-Control-Max-Age"] = "3600";
                 response.Headers["Access-Control-Allow-Headers"] = "*";
                 response.Headers["Access-Control-Allow-Credentials"] = "true";
+
                 using (StreamWriter sw = new StreamWriter(response.OutputStream))
                 {
                     sw.Write(responseBody);

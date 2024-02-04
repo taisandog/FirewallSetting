@@ -129,11 +129,13 @@ namespace FirewallSetting
             string[] urls = conUrl.Split(';');
             _server.ListeneAddress = urls;
             SettingHandle handle = new SettingHandle();
+            WebHandle whandle = new WebHandle();
             handle.UserMan = _userMan;
             handle.Form = this;
             handle.Message = this;
             _server.OnException += _authServices_OnException;
             _server.UrlMap["Setting"] = handle;
+            _server.UrlMap["Web"] = whandle;
             _server.StartServer();
             if (ShowLog)
             {

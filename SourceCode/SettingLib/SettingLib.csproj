@@ -80,6 +80,7 @@
     <Compile Include="TreadPoolManager\BlockThread.cs" />
     <Compile Include="TreadPoolManager\BlockThreadPool.cs" />
     <Compile Include="UserManager.cs" />
+    <Compile Include="WebHandle.cs" />
     <Compile Include="WebServerLib\INetHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\MessageBox.cs">

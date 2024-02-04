@@ -83,7 +83,7 @@ namespace SettingLib
             }
         }
 
-        public APIResault InvokeMethod(string methodName, string arg, HttpListenerRequest request)
+        public APIResault InvokeMethod(string methodName, string arg, HttpListenerRequest request, ref string textHtml)
         {
             Buffalo.Kernel.FastReflection.FastInvokeHandler han = _handle.GetMethod(methodName);
             if (han == null)
