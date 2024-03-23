@@ -182,9 +182,10 @@ namespace SettingLib
         public bool UpdateIP(string ip)
         {
             int change = 0;
+            
             if (_multipleIP)
             {
-                change +=DeleteOld();
+                change += DeleteOld();
                 change += AddIP(ip);
             }
             else
@@ -238,17 +239,19 @@ namespace SettingLib
         public List<string> GetIP()
         {
             List<string> ret = new List<string>();
+            
+            DeleteOld();
             List<IpItem> lst = IPList;
             lock (lst)
             {
-                DeleteOld();
-                if (_multipleIP)
-                {
+                
+                //if (_multipleIP)
+                //{
                     foreach (IpItem item in lst)
                     {
                         ret.Add(item.IP);
                     }
-                }
+                //}
             }
             return ret;
         }

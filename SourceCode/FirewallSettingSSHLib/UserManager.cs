@@ -206,6 +206,8 @@ namespace SettingLib
             lock (this)
             {
                 List<string> lstIP = _fwHandle.LoadUserIP();
+
+                
                 using (SshClient ssh = FirewallUnit.CreateSsh())
                 {
                     ssh.Connect();

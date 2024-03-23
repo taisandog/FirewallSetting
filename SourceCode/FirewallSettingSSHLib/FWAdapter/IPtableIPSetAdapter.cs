@@ -1,4 +1,5 @@
 ﻿using FirewallSettingSSHLib.OSAdapter;
+using Newtonsoft.Json;
 using Renci.SshNet;
 using SettingLib;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace FirewallSettingSSHLib.FWAdapter
@@ -316,10 +318,13 @@ namespace FirewallSettingSSHLib.FWAdapter
         {
             SshCommand res = null;
             List<string> cmd = CreateCommand(ssh);
+            
             foreach (string command in cmd)
             {
                 res = RunCommand(ssh, command);
+
                 ApplicationLog.LogCmdError(res);
+                
             }
 
             string saveCmd = AppConfig.OS.GetIPtablesSaveCommand(false);
@@ -482,6 +487,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             List<string> lstIP = LoadUserIP();
             Dictionary<string, bool> existsIP = new Dictionary<string, bool>();
             FillExistsIP(ssh, AppConfig.IPSetName, existsIP);
+            
             if (AppConfig.UseIPv6)
             {
                 FillExistsIP(ssh, IPSetNameV6, existsIP);
@@ -494,7 +500,6 @@ namespace FirewallSettingSSHLib.FWAdapter
                     existsIP.Remove(ip);
                     continue;
                 }
-
                 cmd.Add(CreateAddIPCommand(ip));
             }
             string exIP = null;
@@ -502,6 +507,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 exIP = kvpExip.Key;
                 cmd.Add(CreateDeleteIPCommand(exIP));//删除集合IP
+               
             }
         }
 
