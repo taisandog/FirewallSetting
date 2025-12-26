@@ -61,7 +61,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh) 
         {
-            SshCommand cmd = RunCommand(ssh, "nft list ruleset");//查看当前规则
+            CommandResault cmd = RunCommand(ssh, "nft list ruleset");//查看当前规则
             if (!IsSuccess(cmd)) 
             {
                 return false;
@@ -85,7 +85,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 CheckIPSet(ssh, IPSetNameV6, true);
             }
-            SshCommand cmd = RunCommand(ssh, "nft list ruleset > /etc/nftables.conf");
+            CommandResault cmd = RunCommand(ssh, "nft list ruleset > /etc/nftables.conf");
             ApplicationLog.LogCmdError(cmd);
             return true;
         }
@@ -103,8 +103,8 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(NFTableName);
             sbCmd.Append(" ");
             sbCmd.Append(NFTableChain);
-            
-           SshCommand cmd = RunCommand(ssh, sbCmd.ToString());//查看当前规则
+
+            CommandResault cmd = RunCommand(ssh, sbCmd.ToString());//查看当前规则
             string res = cmd.Result;
             
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
@@ -202,7 +202,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="ssh"></param>
         public override void UpdateFirewall(SshClient ssh)
         {
-            SshCommand res = null;
+            CommandResault res = null;
             List<string> cmd = CreateCommand(ssh);
             foreach (string command in cmd)
             {
@@ -226,7 +226,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(NFTableName);
             sbCmd.Append(" ");
             sbCmd.Append(ipsetName);
-            SshCommand cmd = RunCommand(ssh,sbCmd.ToString());
+            CommandResault cmd = RunCommand(ssh,sbCmd.ToString());
             string res = cmd.Result;
             string line=null;
             int eleindex = 0;
@@ -459,7 +459,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("nft list table inet ");
             sbCmd.Append(NFTableName);
 
-            SshCommand cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
+            CommandResault cmd = RunCommand(ssh, sbCmd.ToString());//创建IP集
             
             if (!IsSuccess(cmd)) //已存在
             {
@@ -508,9 +508,9 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(NFTableName);
             sbCmd.Append(" ");
             sbCmd.Append(setName);
-           
 
-            SshCommand cmd = RunCommand(ssh,sbCmd.ToString());//查看当前规则
+
+            CommandResault cmd = RunCommand(ssh,sbCmd.ToString());//查看当前规则
 
             
             if (IsSuccess(cmd)) //已存在则退出

@@ -50,7 +50,10 @@ namespace SettingLib
         public static SshClient CreateSsh() 
         {
             
-
+            if(string.IsNullOrWhiteSpace(UserName))
+            {
+                return null;
+            }
             int port = 22;
             if (!string.IsNullOrWhiteSpace(Sport)) 
             {

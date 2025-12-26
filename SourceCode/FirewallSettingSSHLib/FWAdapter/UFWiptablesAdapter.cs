@@ -52,7 +52,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private bool CheckUFWStatus(SshClient ssh)
         {
-            SshCommand cmd = RunCommand(ssh, "ufw status");//查看当前规则
+            CommandResault cmd = RunCommand(ssh, "ufw status");//查看当前规则
             string res = cmd.Result;
 
             if (!string.IsNullOrWhiteSpace(res))

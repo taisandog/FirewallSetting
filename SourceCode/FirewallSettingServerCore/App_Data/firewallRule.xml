@@ -1,14 +1,109 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
 	<rule name="supervisor查看" port="9001" protocol="tcp,udp"/>
-
-
-	<rule name="Web2" port="8808" protocol="tcp,udp"/>
-
-
-	<rule name="Web4" port="808" protocol="tcp,udp"/>
-
-	<rule name="MySQL" port="13880" protocol="tcp,udp"/>
-
-	<rule name="MongoDB" port="13881" protocol="tcp,udp"/>
+	<rule name="Gogs服务" port="3000" protocol="tcp,udp"/>
+	<rule name="frpsMain" port="7000" protocol="tcp,udp"/>
+	<rule name="cfrps01" port="7001" protocol="tcp,udp"/>
+	<rule name="cfrps02" port="7002" protocol="tcp,udp"/>
+	<rule name="cfrps03" port="7003" protocol="tcp,udp"/>
+	<rule name="cfrps04" port="7004" protocol="tcp,udp"/>
+	<rule name="cfrps05" port="7005" protocol="tcp,udp"/>
+	<rule name="cfrps06" port="7006" protocol="tcp,udp"/>
+	<rule name="cfrps07" port="7007" protocol="tcp,udp"/>
+	<rule name="cfrps08" port="7008" protocol="tcp,udp"/>
+	<rule name="cfrps09" port="7009" protocol="tcp,udp"/>
+	<rule name="cfrps10" port="7010" protocol="tcp,udp"/>
+	<rule name="cfrps11" port="7011" protocol="tcp,udp"/>
+	<rule name="cfrps12" port="7012" protocol="tcp,udp"/>
+	<rule name="cfrps13" port="7013" protocol="tcp,udp"/>
+	<rule name="cfrps14" port="7014" protocol="tcp,udp"/>
+	<rule name="cfrps15" port="7015" protocol="tcp,udp"/>
+	<rule name="cfrps16" port="7016" protocol="tcp,udp"/>
+	<rule name="cfrps17" port="7017" protocol="tcp,udp"/>
+	<rule name="cfrps18" port="7018" protocol="tcp,udp"/>
+	<rule name="cfrps19" port="7019" protocol="tcp,udp"/>
+	<rule name="cfrps20" port="7020" protocol="tcp,udp"/>
+	<rule name="cfrps21" port="7021" protocol="tcp,udp"/>
+	<rule name="cfrps22" port="7022" protocol="tcp,udp"/>
+	<rule name="cfrps23" port="7023" protocol="tcp,udp"/>
+	<rule name="cfrps24" port="7024" protocol="tcp,udp"/>
+	<rule name="cfrps25" port="7025" protocol="tcp,udp"/>
+	<rule name="cfrps26" port="7026" protocol="tcp,udp"/>
+	<rule name="cfrps27" port="7027" protocol="tcp,udp"/>
+	<rule name="cfrps28" port="7028" protocol="tcp,udp"/>
+	<rule name="cfrps29" port="7029" protocol="tcp,udp"/>
+	<rule name="cfrps30" port="7030" protocol="tcp,udp"/>
+	<rule name="cfrps31" port="7031" protocol="tcp,udp"/>
+	<rule name="cfrps32" port="7032" protocol="tcp,udp"/>
+	<rule name="cfrps33" port="7033" protocol="tcp,udp"/>
+	<rule name="cfrps34" port="7034" protocol="tcp,udp"/>
+	<rule name="cfrps35" port="7035" protocol="tcp,udp"/>
+	<rule name="cfrps36" port="7036" protocol="tcp,udp"/>
+	<rule name="cfrps37" port="7037" protocol="tcp,udp"/>
+	<rule name="cfrps38" port="7038" protocol="tcp,udp"/>
+	<rule name="cfrps39" port="7039" protocol="tcp,udp"/>
+	<rule name="cfrps40" port="7040" protocol="tcp,udp"/>
+	<rule name="cfrps41" port="7041" protocol="tcp,udp"/>
+	<rule name="cfrps42" port="7042" protocol="tcp,udp"/>
+	<rule name="cfrps43" port="7043" protocol="tcp,udp"/>
+	<rule name="cfrps44" port="7044" protocol="tcp,udp"/>
+	<rule name="cfrps45" port="7045" protocol="tcp,udp"/>
+	<rule name="cfrps46" port="7046" protocol="tcp,udp"/>
+	<rule name="cfrps47" port="7047" protocol="tcp,udp"/>
+	<rule name="cfrps48" port="7048" protocol="tcp,udp"/>
+	<rule name="cfrps49" port="7049" protocol="tcp,udp"/>
+	<rule name="cfrps50" port="7050" protocol="tcp,udp"/>
+	<rule name="frps01" port="9010" protocol="tcp,udp"/>
+	<rule name="frps02" port="9011" protocol="tcp,udp"/>
+	<rule name="frps03" port="9012" protocol="tcp,udp"/>
+	<rule name="frps04" port="9013" protocol="tcp,udp"/>
+	<rule name="frps05" port="9014" protocol="tcp,udp"/>
+	<rule name="frps06" port="9015" protocol="tcp,udp"/>
+	<rule name="frps07" port="9016" protocol="tcp,udp"/>
+	<rule name="frps08" port="9017" protocol="tcp,udp"/>
+	<rule name="frps09" port="9018" protocol="tcp,udp"/>
+	<rule name="frps10" port="9019" protocol="tcp,udp"/>
+	<rule name="frps11" port="9020" protocol="tcp,udp"/>
+	<rule name="frps12" port="9021" protocol="tcp,udp"/>
+	<rule name="frps13" port="9022" protocol="tcp,udp"/>
+	<rule name="frps14" port="9023" protocol="tcp,udp"/>
+	<rule name="frps15" port="9024" protocol="tcp,udp"/>
+	<rule name="frps16" port="9025" protocol="tcp,udp"/>
+	<rule name="frps17" port="9026" protocol="tcp,udp"/>
+	<rule name="frps18" port="9027" protocol="tcp,udp"/>
+	<rule name="frps19" port="9028" protocol="tcp,udp"/>
+	<rule name="frps20" port="9029" protocol="tcp,udp"/>
+	<rule name="frps21" port="9030" protocol="tcp,udp"/>
+	<rule name="frps22" port="9031" protocol="tcp,udp"/>
+	<rule name="frps23" port="9032" protocol="tcp,udp"/>
+	<rule name="frps24" port="9033" protocol="tcp,udp"/>
+	<rule name="frps25" port="9034" protocol="tcp,udp"/>
+	<rule name="frps26" port="9035" protocol="tcp,udp"/>
+	<rule name="frps27" port="9036" protocol="tcp,udp"/>
+	<rule name="frps28" port="9037" protocol="tcp,udp"/>
+	<rule name="frps29" port="9038" protocol="tcp,udp"/>
+	<rule name="frps30" port="9039" protocol="tcp,udp"/>
+	<rule name="frps31" port="9040" protocol="tcp,udp"/>
+	<rule name="frps32" port="9041" protocol="tcp,udp"/>
+	<rule name="frps33" port="9042" protocol="tcp,udp"/>
+	<rule name="frps34" port="9043" protocol="tcp,udp"/>
+	<rule name="frps35" port="9044" protocol="tcp,udp"/>
+	<rule name="frps36" port="9045" protocol="tcp,udp"/>
+	<rule name="frps37" port="9046" protocol="tcp,udp"/>
+	<rule name="frps38" port="9047" protocol="tcp,udp"/>
+	<rule name="frps39" port="9048" protocol="tcp,udp"/>
+	<rule name="frps40" port="9049" protocol="tcp,udp"/>
+	<rule name="frps41" port="9050" protocol="tcp,udp"/>
+	<rule name="frps42" port="9051" protocol="tcp,udp"/>
+	<rule name="frps43" port="9052" protocol="tcp,udp"/>
+	<rule name="frps44" port="9053" protocol="tcp,udp"/>
+	<rule name="frps45" port="9054" protocol="tcp,udp"/>
+	<rule name="frps46" port="9055" protocol="tcp,udp"/>
+	<rule name="frps47" port="9056" protocol="tcp,udp"/>
+	<rule name="frps48" port="9057" protocol="tcp,udp"/>
+	<rule name="frps49" port="9058" protocol="tcp,udp"/>
+	<rule name="frps50" port="9059" protocol="tcp,udp"/>
+	<rule name="frps51" port="9060" protocol="tcp,udp"/>
+	
+	<rule name="mavenrepository" port="460" protocol="tcp,udp"/>
 </root>

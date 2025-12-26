@@ -1,4 +1,5 @@
-﻿using Renci.SshNet;
+﻿using Buffalo.ArgCommon;
+using Renci.SshNet;
 using SettingLib;
 using System;
 using System.Collections.Generic;
@@ -28,8 +29,8 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         public override bool CheckEnable(SshClient ssh) 
         {
-            SshCommand cmd = RunCommand(ssh,"firewall-cmd --state");//查看当前规则
-            if (!IsSuccess(cmd)) 
+            CommandResault cmd = RunCommand(ssh,"firewall-cmd --state");//查看当前规则
+            if (cmd.IsSuccess) 
             {
                 return false;
             }
@@ -51,7 +52,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 CheckIPSet(ssh, IPSetNameV6, true);
             }
-            SshCommand cmd = RunCommand(ssh,"firewall-cmd --reload");
+            CommandResault cmd = RunCommand(ssh,"firewall-cmd --reload");
             ApplicationLog.LogCmdError(cmd);
             return true;
         }
@@ -64,7 +65,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         private Dictionary<string, FirewallRule> LoadExistsRule(SshClient ssh)
         {
             Dictionary<int, bool> dicPort = LoadRulePort();
-            SshCommand cmd = RunCommand(ssh,"firewall-cmd --list-rich-rules");//查看当前规则
+            CommandResault cmd = RunCommand(ssh,"firewall-cmd --list-rich-rules");//查看当前规则
             string res = cmd.Result;
             
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
@@ -104,7 +105,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="ssh"></param>
         public override void UpdateFirewall(SshClient ssh)
         {
-            SshCommand res = null;
+            CommandResault res = null;
             List<string> cmd = CreateCommand(ssh);
             foreach (string command in cmd)
             {
@@ -127,7 +128,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("firewall-cmd --permanent --ipset=");
             sbCmd.Append(ipsetName);
             sbCmd.Append(" --get-entries");
-            SshCommand cmd = RunCommand(ssh,sbCmd.ToString());
+            CommandResault cmd = RunCommand(ssh,sbCmd.ToString());
             string res = cmd.Result;
             string line=null;
             using (StringReader reader = new StringReader(res))
@@ -312,7 +313,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append(setName);
             sbCmd.Append(" --get-entries");
 
-            SshCommand cmd = RunCommand(ssh,sbCmd.ToString());//查看当前规则
+            CommandResault cmd = RunCommand(ssh,sbCmd.ToString());//查看当前规则
             string res = cmd.Error;
             if (string.IsNullOrWhiteSpace(res)) //已存在则退出
             {

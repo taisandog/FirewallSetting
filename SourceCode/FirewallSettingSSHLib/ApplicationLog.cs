@@ -1,4 +1,5 @@
-﻿using Buffalo.Kernel;
+﻿using Buffalo.ArgCommon;
+using Buffalo.Kernel;
 using FirewallSettingSSHLib.FWAdapter;
 using Newtonsoft.Json;
 using Renci.SshNet;
@@ -37,13 +38,13 @@ namespace FirewallSettingSSHLib
         /// 记录错误日志
         /// </summary>
         /// <param name="cmd"></param>
-        public static void LogCmdError(SshCommand cmd) 
+        public static void LogCmdError(CommandResault cmd ) 
         {
             
-            if (!FWAdapterBase.IsSuccess(cmd) && !string.IsNullOrWhiteSpace(cmd.Error))
+            if (!cmd.IsSuccess )
             {
                 
-                LogError(cmd.CommandText+":"+cmd.Error);
+                LogError(string.Format("{0}:{1}",cmd.CommandText,cmd.Error));
             }
             
         }

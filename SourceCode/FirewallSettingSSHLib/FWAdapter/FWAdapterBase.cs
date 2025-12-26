@@ -1,10 +1,13 @@
-﻿using Buffalo.Kernel;
+﻿using Buffalo.ArgCommon;
+using Buffalo.Kernel;
 using FirewallSettingSSHLib.OSAdapter;
 using Renci.SshNet;
 using SettingLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,9 +47,9 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        public static bool IsSuccess(SshCommand cmd) 
+        public static bool IsSuccess(CommandResault cmd) 
         {
-            return cmd.ExitStatus == 0;
+            return cmd.IsSuccess;
         }
         
         protected List<FirewallItem> _firewallRule;
@@ -87,9 +90,66 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        public SshCommand RunCommand(SshClient ssh,string cmd) 
+        public CommandResault RunCommand(SshClient ssh,string cmd) 
         {
-            SshCommand ret = null;
+            if (ssh != null)
+            {
+                return RunSSHCommand(ssh, cmd);
+            }
+            
+            return RunCustomCommand(cmd);
+        }
+        /// <summary>
+        /// 执行本地命令
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        private static CommandResault RunCustomCommand( string cmd)
+        {
+            if (string.IsNullOrWhiteSpace(cmd))
+            {
+                return new CommandResault(-1, "指令不能为空", "指令不能为空",cmd);
+            }
+            
+            string runcmd = cmd.Replace("\\","\\\\");
+            runcmd = runcmd.Replace("\"", "\\\"");
+            string bashCmd = string.Format("-c \"{0}\"", runcmd);
+            var startInfo = new ProcessStartInfo
+            {
+                
+                FileName = "/bin/sh",
+                // 示例：在 INPUT 链添加一条丢弃来自特定 IP 报文的规则
+                Arguments = bashCmd,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            string result = null;
+            string error = null;
+            int code = 0;
+            using (var process = Process.Start(startInfo))
+            {
+                
+                
+                result = process.StandardOutput.ReadToEnd();
+                error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                code = process.ExitCode;
+            }
+            return new CommandResault(code, result, error, bashCmd);
+            
+        }
+
+        /// <summary>
+        /// 执行SSH命令
+        /// </summary>
+        /// <param name="ssh"></param>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        private static CommandResault RunSSHCommand(SshClient ssh, string cmd)
+        {
+            SshCommand retCmd = null;
             if (AppConfig.UseSudo)
             {
                 StringBuilder sb = new StringBuilder();
@@ -104,14 +164,17 @@ namespace FirewallSettingSSHLib.FWAdapter
                     sb.Append("sudo ");
                 }
                 sb.Append(cmd);
-                ret = ssh.RunCommand(sb.ToString());
+                retCmd = ssh.RunCommand(sb.ToString());
+                
+                
             }
             else
             {
-                ret = ssh.RunCommand(cmd);
+                retCmd = ssh.RunCommand(cmd);
+               
             }
+            return new CommandResault(retCmd.ExitStatus, retCmd.Result, retCmd.Error, retCmd.CommandText);
             
-            return ret;
         }
 
         public abstract string Name { get; }

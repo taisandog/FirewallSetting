@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <returns></returns>
         private bool CheckIPTablesStatus(SshClient ssh)
         {
-            SshCommand cmd = RunCommand(ssh, "service iptables status");//查看当前规则
+            CommandResault cmd = RunCommand(ssh, "service iptables status");//查看当前规则
             string res = cmd.Result;
 
             bool ret = false;
@@ -87,7 +88,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="ssh"></param>
         private void IPtablesRestore(SshClient ssh)
         {
-            SshCommand cmd = null;
+            CommandResault cmd = null;
             string insCmd = AppConfig.OS.GetIPtablesRestoreCommand(false);
             if (!string.IsNullOrWhiteSpace(insCmd))
             {
@@ -114,7 +115,7 @@ namespace FirewallSettingSSHLib.FWAdapter
 
         private void CheckIPSetInstall(SshClient ssh)
         {
-            SshCommand cmd = RunCommand(ssh, "ipset list");//查看当前规则
+            CommandResault cmd = RunCommand(ssh, "ipset list");//查看当前规则
             if (IsSuccess(cmd))
             {
                 return;
@@ -151,7 +152,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             Dictionary<string, FirewallRule> dicExists = new Dictionary<string, FirewallRule>();
 
 
-            SshCommand cmd = RunCommand(ssh, "iptables -nvL INPUT --line-number");//查看当前规则
+            CommandResault cmd = RunCommand(ssh, "iptables -nvL INPUT --line-number");//查看当前规则
             string res = cmd.Result;
             ipHead = "! match-set " + AppConfig.IPSetName;
 
@@ -276,7 +277,15 @@ namespace FirewallSettingSSHLib.FWAdapter
             {
                 int end = line.IndexOf(" ", protHeadIndex);
                 string ret = line.Substring(protHeadIndex, end - protHeadIndex);
-                return ret;
+                int num = 0;
+                if(!int.TryParse(ret, out num))
+                {
+                    return ret;
+                }
+
+                ProtocolType pt = (ProtocolType)num;
+
+                return pt.ToString().ToLower();
             }
             catch
             {
@@ -316,7 +325,7 @@ namespace FirewallSettingSSHLib.FWAdapter
         /// <param name="ssh"></param>
         public override void UpdateFirewall(SshClient ssh)
         {
-            SshCommand res = null;
+            CommandResault res = null;
             List<string> cmd = CreateCommand(ssh);
             
             foreach (string command in cmd)
@@ -348,7 +357,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             StringBuilder sbCmd = new StringBuilder();
             sbCmd.Append("ipset list ");
             sbCmd.Append(ipsetName);
-            SshCommand cmd = RunCommand(ssh, sbCmd.ToString());
+            CommandResault cmd = RunCommand(ssh, sbCmd.ToString());
             string res = cmd.Result;
             string line = null;
             int state = 0;
@@ -628,7 +637,7 @@ namespace FirewallSettingSSHLib.FWAdapter
             sbCmd.Append("ipset list ");
             sbCmd.Append(setName);
 
-            SshCommand cmd = RunCommand(ssh, sbCmd.ToString());//查看当前规则
+            CommandResault cmd = RunCommand(ssh, sbCmd.ToString());//查看当前规则
             string res = cmd.Result;
             string err = cmd.Error;
             string line = null;

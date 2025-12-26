@@ -56,10 +56,13 @@ namespace SettingLib
 
         private FWAdapterBase LoadAdapter()
         {
-            
-            using (SshClient ssh = FirewallUnit.CreateSsh())
+            SshClient ssh = FirewallUnit.CreateSsh();
+            try
             {
-                ssh.Connect();
+                if (ssh != null)
+                {
+                    ssh.Connect();
+                }
 
                 if (string.Equals(AppConfig.FirewallType, "iptables", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -104,6 +107,13 @@ namespace SettingLib
 
 
                 return FindFirewalld(ssh);
+            }
+            finally
+            {
+                if (ssh != null)
+                {
+                    ssh.Disconnect();
+                }
             }
 
         }
@@ -207,13 +217,24 @@ namespace SettingLib
             {
                 List<string> lstIP = _fwHandle.LoadUserIP();
 
-                
-                using (SshClient ssh = FirewallUnit.CreateSsh())
+                SshClient ssh = FirewallUnit.CreateSsh();
+                try
                 {
-                    ssh.Connect();
+                    if (ssh != null)
+                    {
+                        ssh.Connect();
+                    }
                     //对别哪些需要执行
 
                     _fwHandle.UpdateFirewall(ssh);
+
+                }
+                finally
+                {
+                    if (ssh != null)
+                    {
+                        ssh.Disconnect();
+                    }
                 }
             }
         }
