@@ -1,6 +1,6 @@
 # 客户端与服务端使用指南
 
-本指南对标并全面升级了原项目中的各类 docx 文档，详细讲解 **FirewallSetting** 在 Windows 与 Linux 服务端的用户管理、密钥生成，以及在 Windows 桌面客户端与 Web 网页客户端上的配置导入、多服务器维护与自动白名单同步。
+本指南对标并全面升级了原项目中的各类 docx 文档，详细讲解 **FirewallSetting** 在 Windows 与 Linux 服务端的用户管理、密钥生成，以及在 Windows 桌面客户端与服务端内置 Web 网页客户端上的配置导入、多服务器维护与自动白名单同步。
 
 ---
 
@@ -11,7 +11,7 @@
   - [2. Windows 服务端图形界面管理 (GUI)](#2-windows-服务端图形界面管理-gui)
 - [三、客户端使用指南](#三客户端使用指南)
   - [1. Windows 桌面客户端 (FWSettingClient)](#1-windows-桌面客户端-fwsettingclient)
-  - [2. Web 版客户端 (FWSettingWebClient / 内置Web)](#2-web-版客户端-fwsettingwebclient--内置web)
+  - [2. 服务端内置 Web 客户端（开箱即用）](#2-服务端内置-web-客户端开箱即用)
 - [四、配置 JSON 结构解析](#四配置-json-结构解析)
 - [五、日常运维场景与常见问题](#五日常运维场景与常见问题)
 
@@ -91,8 +91,6 @@
 
 Windows 服务端 `FirewallSetting.exe` 采用全图形化界面操作，清晰直观。
 
-![Windows服务端界面示意](https://raw.githubusercontent.com/) *(注：界面包含用户列表、规则列表、操作日志与开机启动勾选项)*
-
 #### 用户列表右键菜单操作：
 在主界面的上方用户列表空白处或用户条目上 **单击鼠标右键**，可弹出管理菜单：
 - **新增用户**：弹出对话框，输入用户名后自动随机生成强密钥并创建用户。
@@ -142,13 +140,18 @@ Windows 服务端 `FirewallSetting.exe` 采用全图形化界面操作，清晰�
 
 ---
 
-### 2. Web 版客户端 (FWSettingWebClient / 内置Web)
+### 2. 服务端内置 Web 客户端（开箱即用）
 
-适用于 Mac、Linux 桌面端、手机平板或不想在电脑上运行后台客户端程序的用户。
+适用于 Mac、Linux 桌面端、手机平板，或者不想在本地 Windows 电脑上运行常驻后台客户端的用户。
+
+> [!TIP]
+> **免安装免配置**：
+> 早期代码库中的 `FWSettingWebClient` 独立工程已被废弃。目前 Web 客户端已经**直接内嵌在服务端（无论是 Linux 服务端还是 Windows 服务端）**，开箱即用，无需配置额外端口或独立部署！
 
 #### 访问入口：
-- **独立部署的 Web 客户端**：访问 `http://<Web客户端IP>:8788`。
-- **服务端自带的内嵌页面**：访问 `http://<服务端IP>:8789/web/index.html`。
+直接在浏览器中打开：
+`http://<服务器IP>:<服务端监听端口>/web/index.html`  
+*(例如：`http://120.79.xx.xx:8789/web/index.html` 或 `http://192.168.31.28:8789/web/index.html`)*
 
 #### 界面操作指引：
 1. **添加服务配置**：

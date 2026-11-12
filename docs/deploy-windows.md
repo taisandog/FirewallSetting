@@ -1,6 +1,6 @@
 # Windows 服务器部署与配置指南
 
-本文档详细介绍 **FirewallSetting (Windows 服务端: FirewallSetting.exe)** 以及 **Web 版客户端 (FWSettingWebClient)** 在 Windows 环境下的安装、系统防火墙联动配置、服务化/计划任务自启与配置项详解。
+本文档详细介绍 **FirewallSetting (Windows 服务端: FirewallSetting.exe)** 在 Windows 环境下的安装、系统防火墙联动配置、服务化/计划任务自启、内置 Web 客户端说明与配置项详解。
 
 ---
 
@@ -11,7 +11,7 @@
   - [2. 前置准备：创建 Windows 高级防火墙规则](#2-前置准备创建-windows-高级防火墙规则重要)
   - [3. 启动与开机自动运行](#3-启动与开机自动运行)
   - [4. （可选）使用 Windows 计划任务或 NSSM 安装为后台系统服务](#4-可选使用-windows-计划任务或-nssm-安装为后台系统服务)
-- [三、Web 客户端部署 (Windows)](#三web-客户端部署-windows)
+- [三、内置 Web 客户端说明（免单独部署）](#三内置-web-客户端说明免单独部署)
 - [四、Windows 部署配置全解析（代码级对照）](#四windows-部署配置全解析代码级对照)
   - [1. FirewallSetting.exe.config 主配置文件](#1-firewallsettingexeconfig-主配置文件)
   - [2. App_Data/firewallRule.xml 规则配置文件](#2-app_datafirewallrulexml-规则配置文件)
@@ -42,7 +42,13 @@ D:\FirewallSetting\
 ├── Buffalo.Kernel.dll 等依赖库
 └── App_Data\
     ├── firewallRule.xml           # 保护规则配置文件
-    └── userInfo.xml               # 用户凭据存储（程序自动维护或手动初始化）
+    ├── userInfo.xml               # 用户凭据存储（程序自动维护或手动初始化）
+    └── web\                       # 内置 Web 客户端页面与前端脚本（开箱即用）
+        ├── index.html
+        ├── jquery.min.js
+        ├── mainpanelaction.js
+        ├── jsonSign.js
+        └── sha1.js
 ```
 
 ---
@@ -66,7 +72,7 @@ D:\FirewallSetting\
 
 > [!TIP]
 > **放行 API 通信端口**：
-> 服务端自带的 HTTP API（默认端口 `8789`）是客户端用来上报 IP 的通道。请确保 Windows 防火墙以及云服务器安全组中 **全局放行了 8789 端口**，不要将 8789 本身加入动态限制。
+> 服务端自带的 HTTP API（默认端口 `8789`）是客户端用来上报 IP 以及访问 Web 客户端的通道。请确保 Windows 防火墙以及云服务器安全组中 **全局放行了 8789 端口**，不要将 8789 本身加入动态限制。
 
 ---
 
@@ -109,18 +115,21 @@ D:\FirewallSetting\
 
 ---
 
-## 三、Web 客户端部署 (Windows)
+## 三、内置 Web 客户端说明（免单独部署）
 
-如果希望在 Windows 机器上为内网用户搭建 Web 版客户端：
+> [!NOTE]
+> **重要更新**：
+> 早期的独立 Web 工程 `FWSettingWebClient`（`run.bat` / 端口 8788）已废弃。Windows 服务端已**原生内嵌 Web 客户端**（由 `SettingLib.WebHandle` 模块负责路由分发，静态资源位于服务端的 `App_Data/web/` 目录中）。
+> **您无需单独部署 Web 版工程或安装额外的 ASP.NET Core 运行时**！
 
-1. 解压 `FWSettingClient.Web.zip` 至任意目录（如 `D:\FWSettingClientWeb\`）。
-2. 用文本编辑器打开目录下的 `run.bat`，根据需要修改监听端口：
-   ```bat
-   dotnet FWSettingWebClient.dll --urls http://0.0.0.0:8788
-   pause
-   ```
-3. 双击 `run.bat` 运行，通过浏览器访问 `http://127.0.0.1:8788` 即可使用。
-4. 若需要开机自启，可将 `run.bat` 的快捷方式放入 Windows“启动”文件夹（`shell:startup`）或同样使用 NSSM 注册为服务。
+### 1. 访问方式
+当 Windows 服务端 `FirewallSetting.exe` 启动后，会在监听端口上同步提供 Web 访问能力：
+- 浏览器访问地址：`http://<服务器IP>:<服务端监听端口>/web/index.html`（例如：`http://192.168.31.28:8789/web/index.html`）。
+
+### 2. 内置 Web 端特性
+- **免搭建与零依赖**：只要 Windows 服务端启动，任何人打开浏览器即可访问；
+- **同端口同源访问**：无跨域问题，安全性与兼容性高；
+- **自适应标题**：服务端会自动根据 `Server.Name` 注入网页标题 `[服务器名]白名单客户端`。
 
 ---
 

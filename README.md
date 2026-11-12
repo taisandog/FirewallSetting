@@ -1,7 +1,7 @@
 # FirewallSetting - Windows/Linux 动态服务器防火墙白名单管理系统
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-blue.svg)](https://github.com/)
-[![.NET Version](https://img.shields.io/badge/.NET-8.0%20%7C%204.8%20%7C%206.0-purple.svg)](https://dotnet.microsoft.com/)
+[![.NET Version](https://img.shields.io/badge/.NET-8.0%20%7C%204.8-purple.svg)](https://dotnet.microsoft.com/)
 [![Security](https://img.shields.io/badge/Security-SHA1%20Sign%20%7C%20Anti--Replay%20%7C%20IPSet-green.svg)](https://github.com/)
 [![Documentation](https://img.shields.io/badge/Docs-Complete%20Guide-orange.svg)](docs/)
 
@@ -14,9 +14,9 @@
 
 | 文档模块 | 内容简要 | 快捷链接 |
 | :--- | :--- | :--- |
-| 🐧 **Linux 部署与配置** | Systemd 原生服务安装 / Supervisord 部署 / Web客户端 / `App.config` 与规则配置 | [👉 查看 Linux 部署指南](docs/deploy-linux.md) |
+| 🐧 **Linux 部署与配置** | Systemd 原生服务安装 / Supervisord 部署 / 内置 Web 端 / `App.config` 与规则配置 | [👉 查看 Linux 部署指南](docs/deploy-linux.md) |
 | 🪟 **Windows 部署与配置** | Windows 服务端部署 / Windows 高级防火墙联动 / 计划任务自启 / 配置参数全解析 | [👉 查看 Windows 部署指南](docs/deploy-windows.md) |
-| 💻 **使用指南 (双端协同)** | Linux CLI 管理命令 / Windows GUI 操作 / Windows 桌面托盘端 / Web 客户端操作 | [👉 查看完整使用指南](docs/usage.md) |
+| 💻 **使用指南 (双端协同)** | Linux CLI 管理命令 / Windows GUI 操作 / Windows 桌面托盘端 / 内置 Web 客户端操作 | [👉 查看完整使用指南](docs/usage.md) |
 
 ---
 
@@ -41,7 +41,7 @@
   - **Windows 服务化**：支持界面一键设置开机自启、Windows 计划任务最高特权运行以及 NSSM 系统服务。
 - 📱 **多端客户端适配**：
   - **Windows 桌面客户端 (`FWSettingClient`)**：轻量系统托盘运行、无感知静默同步、多服务器同时维护、开机自启；
-  - **Web 网页版客户端 (`FWSettingWebClient` / 内置 Web 页面)**：零客户端安装，任何浏览器即可管理并定时自动同步，数据安全保存在浏览器本地。
+  - **服务端内置 Web 客户端（开箱即用）**：**无需额外单独部署 Web 服务**，服务端已原生集成 Web 端。任何平台用户只需访问 `http://<服务器IP>:<监听端口>/web/index.html` 即可使用浏览器完成白名单维护与自动同步。*(注：早期的独立工程 FWSettingWebClient 已废弃并集成到服务端)*。
 - 🔐 **严苛的企业级安全机制**：
   - **V1 / V2 双签名算法**：采用多段独立 GUID 密钥（默认 3 段）与时间戳进行 SHA-1 哈希签名，数据包内容与 IP 强绑定；
   - **防重放攻击 (Anti-Replay)**：时间戳差值必须在 30 秒以内，30 秒内重复数据包由缓存层拦截丢弃；
@@ -55,12 +55,12 @@
 ```text
 FirewallSetting/
 ├── SourceCode/
-│   ├── FirewallSetting/            # Windows 服务端主程序（WinForms 桌面GUI）
-│   ├── FirewallSettingServerCore/  # Linux 服务端核心守护程序（.NET 8.0 控制台 / 服务）
+│   ├── FirewallSetting/            # Windows 服务端主程序（WinForms 桌面GUI，内置 Web 客户端）
+│   ├── FirewallSettingServerCore/  # Linux 服务端核心守护程序（.NET 8.0 控制台 / 服务，内置 Web 客户端）
 │   ├── FWSettingClient/            # Windows 客户端桌面程序（WinForms 系统托盘）
-│   ├── FWSettingWebClient/         # 独立 Web 版客户端（ASP.NET Core / Razor Pages）
 │   ├── FirewallSettingSSHLib/      # Linux 防火墙适配层（ipset、iptables、ufw、nftables）
-│   └── SettingLib/                 # 核心协议类库、缓存层与 Win32 防火墙接口
+│   ├── SettingLib/                 # 核心协议类库、缓存层与 Win32 防火墙接口、内置 Web 处理器
+│   └── FWSettingWebClient/         # [已废弃] 早期独立 Web 客户端（功能已直接内置进服务端 App_Data/web）
 └── docs/
     ├── deploy-linux.md             # Linux 详细部署与配置指南（含 Systemd / Supervisord）
     ├── deploy-windows.md           # Windows 详细部署与配置指南（含 Windows 防火墙联动）
@@ -87,7 +87,7 @@ $$\text{SignV2} = \text{Hash}_1 + \text{"|"} + \text{Hash}_2 + \text{"|"} + \tex
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as 客户端 (Desktop / Web)
+    actor Client as 客户端 (Desktop / 内置Web)
     participant Server as 服务端 API (8789)
     participant Cache as 缓存层 (Memory / Redis)
     participant FW as 底层防火墙 (IPSet / Windows FW)
@@ -126,6 +126,7 @@ sequenceDiagram
 - **配置与规则**：
   - `App.config`：监听地址、固定放行白名单网段、防火墙强制类型选择、本地/SSH执行模式；
   - `App_Data/firewallRule.xml`：需要受白名单保护的端口列表（SSH 22、MySQL 3306 等）。
+- **内置 Web 客户端**：服务端启动后自动开放 `http://<服务器IP>:<监听端口>/web/index.html`，无需安装额外 Web 依赖。
 
 ### 🪟 [前往 Windows 部署与配置指南](docs/deploy-windows.md)
 - **部署方式**：
@@ -135,6 +136,7 @@ sequenceDiagram
 - **配置与规则**：
   - `FirewallSetting.exe.config`：监听设置与固定放行网段；
   - `App_Data/firewallRule.xml`：通过 `ruleName` 精准匹配已有的 Windows 入站规则并动态覆写远程 IP 地址范围。
+- **内置 Web 客户端**：同 Linux 服务端一致，直接访问 `http://<服务器IP>:<监听端口>/web/index.html`。
 
 ---
 
@@ -147,20 +149,21 @@ sequenceDiagram
    - **Windows**：在图形界面用户列表空白处右键选择“新增用户”，随后右键点击“复制此用户配置”。
 2. **客户端导入使用**：
    - **Windows 桌面端 (`FWSettingClient`)**：右下角托盘双击打开主窗口 -> 右键已加载服务选择“添加” -> 粘贴配置码 -> 自动开始每 5 分钟静默同步；
-   - **Web 端 (`FWSettingWebClient` / `/web/index.html`)**：在浏览器打开页面 -> 在“操作配置”框中粘贴配置码并点击“添加服务” -> 页面保持开启时每 60 秒自动同步。
+   - **内置 Web 网页端 (`/web/index.html`)**：在浏览器打开 `http://<服务器IP>:<监听端口>/web/index.html` -> 在“操作配置”框中粘贴配置码并点击“添加服务” -> 页面保持开启时每 60 秒自动同步。
 
 ---
 
 ## 平台与功能对比表
 
-| 对比维度 | Linux 服务端 (ServerCore) | Windows 服务端 (WinForms) | Windows 桌面客户端 | Web 网页客户端 |
+| 对比维度 | Linux 服务端 (ServerCore) | Windows 服务端 (WinForms) | Windows 桌面客户端 | 服务端内置 Web 客户端 |
 | :--- | :--- | :--- | :--- | :--- |
-| **运行平台** | Linux (CentOS/Ubuntu/Debian) | Windows Server 2012+ / 10 / 11 | Windows 7 / 10 / 11 | 任何支持浏览器的系统 |
-| **运行时依赖** | .NET 8.0 Runtime | .NET Framework 4.8 | .NET Framework 4.8 | ASP.NET Core 或静态页面 |
-| **底层实现** | IPSet / iptables / ufw / nft | Windows Defender Firewall (COM) | WinForms 后台多线程 | Browser JS 定时器 / AJAX |
-| **后台守护** | Systemd / Supervisord | 开机自启注册表 / 计划任务 | 最小化任务栏托盘运行 | 浏览器标签页驻留 |
+| **运行平台** | Linux (CentOS/Ubuntu/Debian) | Windows Server 2012+ / 10 / 11 | Windows 7 / 10 / 11 | 任何支持现代浏览器的设备 |
+| **运行时依赖** | .NET 8.0 Runtime | .NET Framework 4.8 | .NET Framework 4.8 | 无需安装，浏览器直接访问 |
+| **部署方式** | Systemd 服务 / Supervisord | 应用程序管理员运行 / 计划任务 | 解压即用，支持开机托盘自启 | **直接内置在服务端中，免额外部署** |
+| **底层实现** | IPSet / iptables / ufw / nft | Windows Defender Firewall (COM) | WinForms 后台多线程 | HTML5 / JQuery / 本地 LocalStorage |
+| **访问/服务端口** | 默认 `8789` | 默认 `8789` | 本地后台进程 | 与服务端同端口（`/web/index.html`） |
 | **自动同步周期** | 服务端每 5 分钟定时自刷新 | 服务端每 5 分钟定时自刷新 | 客户端每 5 分钟自动上报 | 网页端每 60 秒自动上报 |
-| **数据存储介质** | `userInfo.xml` / `firewallRule.xml` | `userInfo.xml` / `firewallRule.xml` | `accont.xml` / 注册表 | 浏览器 `localStorage` |
+| **数据存储介质** | `userInfo.xml` / `firewallRule.xml` | `userInfo.xml` / `firewallRule.xml` | `accont.xml` / 注册表 | 浏览器 `localStorage` (`fwservers`) |
 
 ---
 
@@ -172,5 +175,7 @@ sequenceDiagram
   A: 连续输入错误密钥超过 5 次会触发 5 分钟防爆破封禁。请确认配置码是否粘贴完整无误，等待 5 分钟解除封禁后再试。
 - **Q: Windows 服务端无法更新防火墙规则？**  
   A: `FirewallSetting.exe` 必须**以管理员身份运行**；同时确认 `firewallRule.xml` 中的 `ruleName` 与 Windows 高级防火墙中已有规则的名称完全一致。
+- **Q: Web 客户端需要单独安装环境或者开独立端口吗？**  
+  A: 不需要！原有的 `FWSettingWebClient` 已经废弃并原生集成到了服务端中。只要服务端启动（监听如 8789 端口），通过浏览器访问 `http://<服务器IP>:8789/web/index.html` 即可直接使用 Web 版客户端。
 - **Q: 宽带重新拔号换了新 IP，多久能够恢复访问？**  
   A: 客户端会在下一次 5 分钟周期到达时自动同步。若需立即连接，只需在客户端主界面点击“同步IP到服务器”或 Web 版点击“手动同步”，数秒内即可恢复通行。

@@ -1,6 +1,6 @@
 # Linux 服务器部署与配置指南
 
-本文档详细介绍 **FirewallSetting (Linux 服务端: FirewallSettingServerCore)** 以及 **Web 版客户端 (FWSettingWebClient)** 在 Linux 环境下的安装、服务化部署（Systemd / Supervisord）、核心参数配置与常见问题排查。
+本文档详细介绍 **FirewallSetting (Linux 服务端: FirewallSettingServerCore)** 在 Linux 环境下的安装、服务化部署（Systemd / Supervisord）、核心参数配置、内置 Web 客户端说明与常见问题排查。
 
 ---
 
@@ -9,7 +9,7 @@
 - [二、服务端部署方式](#二服务端部署方式)
   - [方式一：通过 Systemd 原生系统服务安装（推荐）](#方式一通过-systemd-原生系统服务安装推荐)
   - [方式二：通过 Supervisord 守护进程安装](#方式二通过-supervisord-守护进程安装)
-- [三、Web 客户端部署 (Linux)](#三web-客户端部署-linux)
+- [三、内置 Web 客户端说明（免单独部署）](#三内置-web-客户端说明免单独部署)
 - [四、Linux 部署配置全解析（代码级对照）](#四linux-部署配置全解析代码级对照)
   - [1. App.config 核心配置项解析](#1-appconfig-核心配置项解析)
   - [2. App_Data/firewallRule.xml 防火墙规则配置](#2-app_datafirewallrulexml-防火墙规则配置)
@@ -78,7 +78,7 @@ sudo mkdir -p /opt/FirewallSetting
 cd /opt/FirewallSetting
 # 确认核心文件存在：
 ls -la /opt/FirewallSetting
-# 应包含：FirewallSettingServerCore.dll、App.config、App_Data 目录等
+# 应包含：FirewallSettingServerCore.dll、App.config、App_Data 目录（内含 web 静态资源）等
 ```
 
 ---
@@ -167,7 +167,7 @@ sudo journalctl -u firewallsetting -n 100 --no-pager
 >    ```
 > 3. 在出现的 `命令:` 提示符下执行 `user add 用户名 1`（1 代表允许多 IP），复制输出的用户配置 JSON。
 > 4. 输入 `exit` 退出前台程序，再执行 `sudo systemctl start firewallsetting` 即可。
-> 5. 或者直接通过浏览器访问服务端自带的 Web 管理端（见下文）。
+> 5. 也可以直接通过浏览器访问服务端自带的 Web 管理端（见下文）。
 
 ---
 
@@ -243,69 +243,22 @@ sudo supervisorctl fg firewallsetting
 
 ---
 
-## 三、Web 客户端部署 (Linux)
-
-本项目提供了独立的 ASP.NET Core Web 版客户端（`FWSettingWebClient`），让任何平台的用户都可以通过浏览器维护和同步自己的公网 IP。
+## 三、内置 Web 客户端说明（免单独部署）
 
 > [!NOTE]
-> `FirewallSettingServerCore` 本身也已经内嵌了 Web 页面，客户端也可以直接访问：
-> `http://<服务器IP>:<监听端口>/web/index.html`。
-> 如果希望单独部署 Web 版客户端，请参考以下步骤：
+> **重要更新**：
+> 早期的独立 Web 工程 `FWSettingWebClient`（监听 8788 端口）已废弃，其功能已经**原生整合进服务端内部**（由 `SettingLib.WebHandle` 模块驱动，静态资源位于 `App_Data/web/`）。
+> 您**无需单独部署任何 Web 项目或占用额外的 Web 端口**！
 
-### 1. 部署文件
-将 `FWSettingWebClient` 发布文件拷贝到 `/opt/FWSettingClientWeb/`：
-```bash
-sudo mkdir -p /opt/FWSettingClientWeb
-# 拷贝文件至 /opt/FWSettingClientWeb
-```
+### 1. 访问方式
+当 `FirewallSettingServerCore` 启动后，会在主端口上直接提供 Web 客户端服务：
+- 访问地址：`http://<服务器IP>:<服务端监听端口>/web/index.html`（例如：`http://120.79.xx.xx:8789/web/index.html`）
+- 程序启动时控制台亦会输出访问提示：`WebClient: http://[Your IP]:8789/web/index.html;`
 
-### 2. 通过 Systemd 部署 Web 客户端
-创建 `/etc/systemd/system/fwsettingwebclient.service`：
-
-```ini
-[Unit]
-Description=FWSetting Web Client Service
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/opt/FWSettingClientWeb
-ExecStart=/usr/bin/dotnet /opt/FWSettingClientWeb/FWSettingWebClient.dll --urls http://0.0.0.0:8788
-Restart=always
-RestartSec=10
-Environment=ASPNETCORE_ENVIRONMENT=Production
-
-[Install]
-WantedBy=multi-user.target
-```
-
-启动并启用：
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable fwsettingwebclient
-sudo systemctl start fwsettingwebclient
-```
-
-### 3. 通过 Supervisord 部署 Web 客户端（备选）
-在 `/etc/supervisord.d/FWSettingClientWeb.ini`（Debian 为 `/etc/supervisor/conf.d/FWSettingClientWeb.conf`）写入：
-
-```ini
-[program:FWSettingWebClient]
-command=dotnet FWSettingWebClient.dll --urls http://0.0.0.0:8788
-directory=/opt/FWSettingClientWeb/
-autostart=true
-autorestart=true
-logfile_maxbytes=50MB
-logfile_backups=10
-loglevel=info
-user=root
-stopsignal=INT
-redirect_stderr=true
-stdout_logfile=/var/log/FWSettingWebClient.out.log
-stderr_logfile=/var/log/FWSettingWebClient.err.log
-```
-执行 `supervisorctl reload` 即可。启动后浏览器访问 `http://<服务器IP>:8788` 即可使用。
+### 2. 内置 Web 端优势
+1. **零部署成本**：跟随服务端一次性启动，不需要额外安装 ASP.NET Core 或配置反向代理；
+2. **同源免跨域**：Web 页面与 API 服务运行于同源同一端口下，天然杜绝浏览器跨域（CORS）问题；
+3. **动态标题注入**：服务端会自动读取 `Server.Name` 并动态替换网页标题为 `[服务器名称]白名单客户端`。
 
 ---
 
@@ -315,6 +268,7 @@ stderr_logfile=/var/log/FWSettingWebClient.err.log
 - 主配置文件：`App.config`
 - 防火墙放行端口与协议规则：`App_Data/firewallRule.xml`
 - 用户与凭据密钥存储：`App_Data/userInfo.xml`
+- 内置 Web 客户端页面与脚本：`App_Data/web/`
 
 ### 1. App.config 核心配置项解析
 
